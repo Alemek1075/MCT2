@@ -55,16 +55,16 @@
                 @Html.DisplayFor(modelItem => item.MatchTypeNavigation.TypeName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.TeamA.TeamId)
+                @Html.DisplayFor(modelItem => item.TeamA.Name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.TeamB.TeamId)
+                @Html.DisplayFor(modelItem => item.TeamB.Name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Tournament.TournamentId)
+                @Html.DisplayFor(modelItem => item.Tournament.Description)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Winner.TeamId)
+                @Html.DisplayFor(modelItem => item.Winner.Name)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.MatchId">Edit</a> |

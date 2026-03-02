@@ -48,8 +48,8 @@ namespace MCT.Controllers
         // GET: Players/Create
         public IActionResult Create()
         {
-            ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "TeamId");
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId");
+            ViewData["Team"] = new SelectList(_context.Teams, "TeamId", "Name");
+            ViewData["User"] = new SelectList(_context.Users, "UserId", "Username");
             return View();
         }
 
@@ -66,8 +66,8 @@ namespace MCT.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "TeamId", player.TeamId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", player.UserId);
+            ViewData["Team"] = new SelectList(_context.Teams, "TeamId", "Name", player.TeamId);
+            ViewData["User"] = new SelectList(_context.Users, "UserId", "Username", player.UserId);
             return View(player);
         }
 
@@ -84,8 +84,8 @@ namespace MCT.Controllers
             {
                 return NotFound();
             }
-            ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "TeamId", player.TeamId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", player.UserId);
+            ViewData["Team"] = new SelectList(_context.Teams, "TeamId", "Name", player.TeamId);
+            ViewData["User"] = new SelectList(_context.Users, "UserId", "Username", player.UserId);
             return View(player);
         }
 
@@ -121,8 +121,8 @@ namespace MCT.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "TeamId", player.TeamId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", player.UserId);
+            ViewData["Team"] = new SelectList(_context.Teams, "TeamId", "Name", player.TeamId);
+            ViewData["User"] = new SelectList(_context.Users, "UserId", "Username", player.UserId);
             return View(player);
         }
 

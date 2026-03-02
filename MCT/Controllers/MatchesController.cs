@@ -52,10 +52,10 @@ namespace MCT.Controllers
         public IActionResult Create()
         {
             ViewData["MatchType"] = new SelectList(_context.MatchTypes, "TypeName", "TypeName");
-            ViewData["TeamAId"] = new SelectList(_context.Teams, "TeamId", "TeamId");
-            ViewData["TeamBId"] = new SelectList(_context.Teams, "TeamId", "TeamId");
-            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "TournamentId");
-            ViewData["WinnerId"] = new SelectList(_context.Teams, "TeamId", "TeamId");
+            ViewData["TeamA"] = new SelectList(_context.Teams, "TeamId", "Name");
+            ViewData["TeamB"] = new SelectList(_context.Teams, "TeamId", "Name");
+            ViewData["Tournament"] = new SelectList(_context.Tournaments, "TournamentId", "Description");
+            ViewData["Winner"] = new SelectList(_context.Teams, "TeamId", "Name");
             return View();
         }
 
@@ -73,10 +73,10 @@ namespace MCT.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["MatchType"] = new SelectList(_context.MatchTypes, "TypeName", "TypeName", match.MatchType);
-            ViewData["TeamAId"] = new SelectList(_context.Teams, "TeamId", "TeamId", match.TeamAId);
-            ViewData["TeamBId"] = new SelectList(_context.Teams, "TeamId", "TeamId", match.TeamBId);
-            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "TournamentId", match.TournamentId);
-            ViewData["WinnerId"] = new SelectList(_context.Teams, "TeamId", "TeamId", match.WinnerId);
+            ViewData["TeamA"] = new SelectList(_context.Teams, "TeamId", "Name", match.TeamAId);
+            ViewData["TeamB"] = new SelectList(_context.Teams, "TeamId", "Name", match.TeamBId);
+            ViewData["Tournament"] = new SelectList(_context.Tournaments, "TournamentId", "Description", match.TournamentId);
+            ViewData["Winner"] = new SelectList(_context.Teams, "TeamId", "Name", match.WinnerId);
             return View(match);
         }
 
@@ -94,10 +94,10 @@ namespace MCT.Controllers
                 return NotFound();
             }
             ViewData["MatchType"] = new SelectList(_context.MatchTypes, "TypeName", "TypeName", match.MatchType);
-            ViewData["TeamAId"] = new SelectList(_context.Teams, "TeamId", "TeamId", match.TeamAId);
-            ViewData["TeamBId"] = new SelectList(_context.Teams, "TeamId", "TeamId", match.TeamBId);
-            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "TournamentId", match.TournamentId);
-            ViewData["WinnerId"] = new SelectList(_context.Teams, "TeamId", "TeamId", match.WinnerId);
+            ViewData["TeamA"] = new SelectList(_context.Teams, "TeamId", "Name", match.TeamAId);
+            ViewData["TeamB"] = new SelectList(_context.Teams, "TeamId", "Name", match.TeamBId);
+            ViewData["Tournament"] = new SelectList(_context.Tournaments, "TournamentId", "Description", match.TournamentId);
+            ViewData["Winner"] = new SelectList(_context.Teams, "TeamId", "Name", match.WinnerId);
             return View(match);
         }
 
@@ -134,10 +134,10 @@ namespace MCT.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["MatchType"] = new SelectList(_context.MatchTypes, "TypeName", "TypeName", match.MatchType);
-            ViewData["TeamAId"] = new SelectList(_context.Teams, "TeamId", "TeamId", match.TeamAId);
-            ViewData["TeamBId"] = new SelectList(_context.Teams, "TeamId", "TeamId", match.TeamBId);
-            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "TournamentId", match.TournamentId);
-            ViewData["WinnerId"] = new SelectList(_context.Teams, "TeamId", "TeamId", match.WinnerId);
+            ViewData["TeamA"] = new SelectList(_context.Teams, "TeamId", "Name", match.TeamAId);
+            ViewData["TeamB"] = new SelectList(_context.Teams, "TeamId", "Name", match.TeamBId);
+            ViewData["Tournament"] = new SelectList(_context.Tournaments, "TournamentId", "Description", match.TournamentId);
+            ViewData["Winner"] = new SelectList(_context.Teams, "TeamId", "Name", match.WinnerId);
             return View(match);
         }
 
