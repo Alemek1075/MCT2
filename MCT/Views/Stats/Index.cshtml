@@ -1,0 +1,65 @@
+﻿@model IEnumerable<MCT.Models.Stat>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Kills)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Deaths)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Assists)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HsPercentage)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Match)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Player)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Kills)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Deaths)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Assists)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HsPercentage)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Match.MatchId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Player.PlayerId)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.StatId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.StatId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.StatId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
