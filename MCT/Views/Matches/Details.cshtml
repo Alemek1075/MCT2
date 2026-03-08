@@ -10,54 +10,22 @@
     <h4>Match</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ScheduledAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ScheduledAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ScoreA)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ScoreA)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ScoreB)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ScoreB)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MatchTypeNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MatchTypeNavigation.TypeName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TeamA)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TeamA.TeamId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TeamB)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TeamB.TeamId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Tournament)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Tournament.TournamentId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Winner)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Winner.TeamId)
-        </dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.ScheduledAt)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.ScheduledAt)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.ScoreA)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.ScoreA)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.ScoreB)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.ScoreB)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.MatchType)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.MatchType)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.TeamA)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.TeamA.Name)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.TeamB)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.TeamB.Name)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Tournament)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Tournament.Description)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Winner)</dt>
+        <dd class="col-sm-10">@(Model.Winner != null ? Model.Winner.Name : "None")</dd>
     </dl>
 </div>
 <div>

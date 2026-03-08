@@ -18,91 +18,129 @@ namespace MCT.Controllers
             _context = context;
         }
 
-        // GET: Tickets
         public async Task<IActionResult> Index()
         {
-            var mctContext = _context.Tickets.Include(t => t.StatusNavigation).Include(t => t.Tournament).Include(t => t.User);
+            var mctContext = _context.Tickets
+                .Include(t => t.StatusNavigation)
+                .Include(t => t.Tournament)
+                .Include(t => t.User);
             return View(await mctContext.ToListAsync());
         }
 
-        // GET: Tickets/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var ticket = await _context.Tickets
                 .Include(t => t.StatusNavigation)
                 .Include(t => t.Tournament)
                 .Include(t => t.User)
                 .FirstOrDefaultAsync(m => m.TicketId == id);
-            if (ticket == null)
-            {
-                return NotFound();
-            }
+
+            if (ticket == null) return NotFound();
 
             return View(ticket);
         }
 
-        // GET: Tickets/Create
         public IActionResult Create()
         {
             ViewData["Status"] = new SelectList(_context.TicketStatuses, "StatusName", "StatusName");
-            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "TournamentId");
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId");
+            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "Description");
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username");
             return View();
         }
 
-        // POST: Tickets/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        private string GenerateUniqueQrCode()
+        {
+            var random = new Random();
+            string newQrCode;
+            bool exists;
+            do
+            {
+                char[] digits = new char[15];
+                for (int i = 0; i < 15; i++)
+                {
+                    digits[i] = (char)('0' + random.Next(0, 10));
+                }
+                newQrCode = new string(digits);
+                exists = _context.Tickets.Any(t => t.QrCode == newQrCode);
+            } while (exists);
+
+            return newQrCode;
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TicketId,UserId,TournamentId,PurchaseDate,Status,QrCode")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("TicketId,UserId,TournamentId,PurchaseDate,Status")] Ticket ticket)
         {
+            // Перевірка дати купівлі квитка відносно дати завершення турніру (AsNoTracking щоб уникнути конфлікту EF)
+            if (ticket.TournamentId.HasValue && ticket.PurchaseDate.HasValue)
+            {
+                var tournament = await _context.Tournaments
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(t => t.TournamentId == ticket.TournamentId);
+
+                if (tournament != null && tournament.EndDate.HasValue)
+                {
+                    if (ticket.PurchaseDate.Value > tournament.EndDate.Value)
+                    {
+                        ModelState.AddModelError("PurchaseDate", "Дата купівлі квитка не може бути пізнішою за дату завершення турніру.");
+                    }
+                }
+            }
+
             if (ModelState.IsValid)
             {
+                ticket.QrCode = GenerateUniqueQrCode();
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             ViewData["Status"] = new SelectList(_context.TicketStatuses, "StatusName", "StatusName", ticket.Status);
-            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "TournamentId", ticket.TournamentId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", ticket.UserId);
+            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "Description", ticket.TournamentId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username", ticket.UserId);
             return View(ticket);
         }
 
-        // GET: Tickets/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var ticket = await _context.Tickets.FindAsync(id);
-            if (ticket == null)
-            {
-                return NotFound();
-            }
+            if (ticket == null) return NotFound();
+
             ViewData["Status"] = new SelectList(_context.TicketStatuses, "StatusName", "StatusName", ticket.Status);
-            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "TournamentId", ticket.TournamentId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", ticket.UserId);
+            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "Description", ticket.TournamentId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username", ticket.UserId);
             return View(ticket);
         }
 
-        // POST: Tickets/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("TicketId,UserId,TournamentId,PurchaseDate,Status,QrCode")] Ticket ticket)
         {
-            if (id != ticket.TicketId)
+            if (id != ticket.TicketId) return NotFound();
+
+            // Перевірка на унікальність QrCode
+            if (_context.Tickets.Any(t => t.QrCode == ticket.QrCode && t.TicketId != ticket.TicketId))
             {
-                return NotFound();
+                ModelState.AddModelError("QrCode", "Квиток із таким QrCode вже існує.");
+            }
+
+            // Перевірка дати купівлі квитка відносно дати завершення турніру (AsNoTracking)
+            if (ticket.TournamentId.HasValue && ticket.PurchaseDate.HasValue)
+            {
+                var tournament = await _context.Tournaments
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(t => t.TournamentId == ticket.TournamentId);
+
+                if (tournament != null && tournament.EndDate.HasValue)
+                {
+                    if (ticket.PurchaseDate.Value > tournament.EndDate.Value)
+                    {
+                        ModelState.AddModelError("PurchaseDate", "Дата купівлі квитка не може бути пізнішою за дату завершення турніру.");
+                    }
+                }
             }
 
             if (ModelState.IsValid)
@@ -114,54 +152,38 @@ namespace MCT.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TicketExists(ticket.TicketId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!TicketExists(ticket.TicketId)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
             ViewData["Status"] = new SelectList(_context.TicketStatuses, "StatusName", "StatusName", ticket.Status);
-            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "TournamentId", ticket.TournamentId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", ticket.UserId);
+            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "Description", ticket.TournamentId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username", ticket.UserId);
             return View(ticket);
         }
 
-        // GET: Tickets/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var ticket = await _context.Tickets
                 .Include(t => t.StatusNavigation)
                 .Include(t => t.Tournament)
                 .Include(t => t.User)
                 .FirstOrDefaultAsync(m => m.TicketId == id);
-            if (ticket == null)
-            {
-                return NotFound();
-            }
+
+            if (ticket == null) return NotFound();
 
             return View(ticket);
         }
 
-        // POST: Tickets/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var ticket = await _context.Tickets.FindAsync(id);
-            if (ticket != null)
-            {
-                _context.Tickets.Remove(ticket);
-            }
+            if (ticket != null) _context.Tickets.Remove(ticket);
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

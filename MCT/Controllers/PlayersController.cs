@@ -18,14 +18,12 @@ namespace MCT.Controllers
             _context = context;
         }
 
-        // GET: Players
         public async Task<IActionResult> Index()
         {
             var mctContext = _context.Players.Include(p => p.Team).Include(p => p.User);
             return View(await mctContext.ToListAsync());
         }
 
-        // GET: Players/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -45,17 +43,13 @@ namespace MCT.Controllers
             return View(player);
         }
 
-        // GET: Players/Create
         public IActionResult Create()
         {
             ViewData["Team"] = new SelectList(_context.Teams, "TeamId", "Name");
-            ViewData["User"] = new SelectList(_context.Users, "UserId", "Username");
+            ViewData["User"] = new SelectList(_context.Users.Where(u => u.Role == "Player"), "UserId", "Username");
             return View();
         }
 
-        // POST: Players/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("PlayerId,UserId,TeamId")] Player player)
@@ -67,11 +61,10 @@ namespace MCT.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["Team"] = new SelectList(_context.Teams, "TeamId", "Name", player.TeamId);
-            ViewData["User"] = new SelectList(_context.Users, "UserId", "Username", player.UserId);
+            ViewData["User"] = new SelectList(_context.Users.Where(u => u.Role == "Player"), "UserId", "Username", player.UserId);
             return View(player);
         }
 
-        // GET: Players/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -85,13 +78,10 @@ namespace MCT.Controllers
                 return NotFound();
             }
             ViewData["Team"] = new SelectList(_context.Teams, "TeamId", "Name", player.TeamId);
-            ViewData["User"] = new SelectList(_context.Users, "UserId", "Username", player.UserId);
+            ViewData["User"] = new SelectList(_context.Users.Where(u => u.Role == "Player"), "UserId", "Username", player.UserId);
             return View(player);
         }
 
-        // POST: Players/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("PlayerId,UserId,TeamId")] Player player)
@@ -122,11 +112,10 @@ namespace MCT.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["Team"] = new SelectList(_context.Teams, "TeamId", "Name", player.TeamId);
-            ViewData["User"] = new SelectList(_context.Users, "UserId", "Username", player.UserId);
+            ViewData["User"] = new SelectList(_context.Users.Where(u => u.Role == "Player"), "UserId", "Username", player.UserId);
             return View(player);
         }
 
-        // GET: Players/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -146,7 +135,6 @@ namespace MCT.Controllers
             return View(player);
         }
 
-        // POST: Players/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

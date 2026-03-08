@@ -15,23 +15,24 @@
             <input type="hidden" asp-for="MatchId" />
             <div class="form-group">
                 <label asp-for="Tournament" class="control-label"></label>
-                <select asp-for="TournamentId" class="form-control" asp-items="ViewBag.Tournament"></select>
+                <select asp-for="TournamentId" class="form-control" asp-items="ViewBag.Tournament">
+                    <option value="">-- Оберіть турнір --</option>
+                </select>
                 <span asp-validation-for="TournamentId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="TeamA" class="control-label"></label>
-                <select asp-for="TeamAId" class="form-control" asp-items="ViewBag.TeamA"></select>
+                <select asp-for="TeamAId" class="form-control" asp-items="ViewBag.TeamA">
+                    <option value="">-- Оберіть команду А --</option>
+                </select>
                 <span asp-validation-for="TeamAId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="TeamB" class="control-label"></label>
-                <select asp-for="TeamBId" class="form-control" asp-items="ViewBag.TeamB"></select>
+                <select asp-for="TeamBId" class="form-control" asp-items="ViewBag.TeamB">
+                    <option value="">-- Оберіть команду Б --</option>
+                </select>
                 <span asp-validation-for="TeamBId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Winner" class="control-label"></label>
-                <select asp-for="WinnerId" class="form-control" asp-items="ViewBag.Winner"></select>
-                <span asp-validation-for="WinnerId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="ScheduledAt" class="control-label"></label>
@@ -50,7 +51,9 @@
             </div>
             <div class="form-group">
                 <label asp-for="MatchType" class="control-label"></label>
-                <select asp-for="MatchType" class="form-control" asp-items="ViewBag.MatchType"></select>
+                <select asp-for="MatchType" class="form-control" asp-items="ViewBag.MatchType">
+                    <option value="">-- Оберіть тип матчу --</option>
+                </select>
                 <span asp-validation-for="MatchType" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -65,5 +68,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

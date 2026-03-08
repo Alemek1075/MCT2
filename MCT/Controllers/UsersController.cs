@@ -18,46 +18,40 @@ namespace MCT.Controllers
             _context = context;
         }
 
-        // GET: Users
         public async Task<IActionResult> Index()
         {
             var mctContext = _context.Users.Include(u => u.RoleNavigation);
             return View(await mctContext.ToListAsync());
         }
 
-        // GET: Users/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var user = await _context.Users
                 .Include(u => u.RoleNavigation)
                 .FirstOrDefaultAsync(m => m.UserId == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+            if (user == null) return NotFound();
 
             return View(user);
         }
 
-        // GET: Users/Create
         public IActionResult Create()
         {
             ViewData["Role"] = new SelectList(_context.UserRoles, "RoleName", "RoleName");
             return View();
         }
 
-        // POST: Users/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("UserId,Username,Email,PasswordHash,Role")] User user)
         {
+            // Перевірка на унікальність імені
+            if (_context.Users.Any(u => u.Username == user.Username))
+            {
+                ModelState.AddModelError("Username", "Користувач з таким ім'ям вже існує.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(user);
@@ -68,33 +62,27 @@ namespace MCT.Controllers
             return View(user);
         }
 
-        // GET: Users/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+            if (user == null) return NotFound();
+
             ViewData["Role"] = new SelectList(_context.UserRoles, "RoleName", "RoleName", user.Role);
             return View(user);
         }
 
-        // POST: Users/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("UserId,Username,Email,PasswordHash,Role")] User user)
         {
-            if (id != user.UserId)
+            if (id != user.UserId) return NotFound();
+
+            // Перевірка на унікальність імені для інших юзерів (окрім поточного)
+            if (_context.Users.Any(u => u.Username == user.Username && u.UserId != user.UserId))
             {
-                return NotFound();
+                ModelState.AddModelError("Username", "Користувач з таким ім'ям вже існує.");
             }
 
             if (ModelState.IsValid)
@@ -106,14 +94,8 @@ namespace MCT.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!UserExists(user.UserId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!UserExists(user.UserId)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -121,36 +103,24 @@ namespace MCT.Controllers
             return View(user);
         }
 
-        // GET: Users/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var user = await _context.Users
                 .Include(u => u.RoleNavigation)
                 .FirstOrDefaultAsync(m => m.UserId == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+            if (user == null) return NotFound();
 
             return View(user);
         }
 
-        // POST: Users/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var user = await _context.Users.FindAsync(id);
-            if (user != null)
-            {
-                _context.Users.Remove(user);
-            }
-
+            if (user != null) _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
