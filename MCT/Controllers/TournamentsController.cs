@@ -51,19 +51,40 @@ namespace MCT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TournamentId,Description,Location,StartDate,EndDate,Price,Status")] Tournament tournament)
         {
-            if (tournament.StartDate.HasValue) tournament.StartDate = DateTime.SpecifyKind(tournament.StartDate.Value, DateTimeKind.Utc);
-            if (tournament.EndDate.HasValue) tournament.EndDate = DateTime.SpecifyKind(tournament.EndDate.Value, DateTimeKind.Utc);
-
             if (ModelState.IsValid)
             {
+                var today = DateTime.UtcNow.Date;
+
+                if (tournament.Status == "Active") 
+                {
+                    if (tournament.StartDate.HasValue && tournament.EndDate.HasValue)
+                    {
+                        var start = tournament.StartDate.Value.Date;
+                        var end = tournament.EndDate.Value.Date;
+
+                        if (today < start)
+                            tournament.Status = "Planned";
+                        else if (today >= start && today <= end)
+                            tournament.Status = "Ongoing";
+                        else
+                            tournament.Status = "Completed";
+                    }
+                    else
+                    {
+                        tournament.Status = "Planned"; 
+                    }
+                }
+                
+
                 _context.Add(tournament);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             var statuses = new List<SelectListItem> {
-                new SelectListItem { Value = "Active", Text = "Automatic" },
-                new SelectListItem { Value = "Canceled", Text = "Canceled" }
-            };
+        new SelectListItem { Value = "Active", Text = "Automatic" },
+        new SelectListItem { Value = "Canceled", Text = "Canceled" }
+    };
             ViewData["Status"] = new SelectList(statuses, "Value", "Text", tournament.Status);
             return View(tournament);
         }
@@ -76,10 +97,13 @@ namespace MCT.Controllers
             if (tournament == null) return NotFound();
 
             var statuses = new List<SelectListItem> {
-                new SelectListItem { Value = "Active", Text = "Automatic" },
-                new SelectListItem { Value = "Canceled", Text = "Canceled" }
-            };
-            ViewData["Status"] = new SelectList(statuses, "Value", "Text", tournament.Status);
+        new SelectListItem { Value = "Active", Text = "Automatic" },
+        new SelectListItem { Value = "Canceled", Text = "Canceled" }
+    };
+
+            var currentStatus = tournament.Status == "Canceled" ? "Canceled" : "Active";
+            ViewData["Status"] = new SelectList(statuses, "Value", "Text", currentStatus);
+
             return View(tournament);
         }
 
@@ -89,28 +113,33 @@ namespace MCT.Controllers
         {
             if (id != tournament.TournamentId) return NotFound();
 
-            if (tournament.StartDate.HasValue) tournament.StartDate = DateTime.SpecifyKind(tournament.StartDate.Value, DateTimeKind.Utc);
-            if (tournament.EndDate.HasValue) tournament.EndDate = DateTime.SpecifyKind(tournament.EndDate.Value, DateTimeKind.Utc);
-
-            if (tournament.StartDate.HasValue && tournament.EndDate.HasValue)
-            {
-                bool invalidMatches = await _context.Matches
-                    .Where(m => m.TournamentId == tournament.TournamentId && m.ScheduledAt.HasValue)
-                    .AnyAsync(m => m.ScheduledAt.Value.Date < tournament.StartDate.Value.Date || m.ScheduledAt.Value.Date > tournament.EndDate.Value.Date);
-
-                if (invalidMatches) ModelState.AddModelError("StartDate", "Existing matches fall outside the new date range.");
-
-                bool invalidTickets = await _context.Tickets
-                    .Where(t => t.TournamentId == tournament.TournamentId && t.PurchaseDate.HasValue)
-                    .AnyAsync(t => t.PurchaseDate.Value.Date > tournament.EndDate.Value.Date);
-
-                if (invalidTickets) ModelState.AddModelError("EndDate", "Existing tickets have purchase dates after the new end date.");
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
+                    if (tournament.StartDate.HasValue)
+                        tournament.StartDate = DateTime.SpecifyKind(tournament.StartDate.Value, DateTimeKind.Utc);
+                    if (tournament.EndDate.HasValue)
+                        tournament.EndDate = DateTime.SpecifyKind(tournament.EndDate.Value, DateTimeKind.Utc);
+
+                    if (tournament.Status == "Active")
+                    {
+                        var today = DateTime.UtcNow.Date;
+                        if (tournament.StartDate.HasValue && tournament.EndDate.HasValue)
+                        {
+                            var start = tournament.StartDate.Value.Date;
+                            var end = tournament.EndDate.Value.Date;
+
+                            if (today < start) tournament.Status = "Planned";
+                            else if (today >= start && today <= end) tournament.Status = "Ongoing";
+                            else tournament.Status = "Completed";
+                        }
+                        else
+                        {
+                            tournament.Status = "Planned";
+                        }
+                    }
+
                     _context.Update(tournament);
                     await _context.SaveChangesAsync();
                 }
@@ -121,10 +150,11 @@ namespace MCT.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             var statuses = new List<SelectListItem> {
-                new SelectListItem { Value = "Active", Text = "Automatic" },
-                new SelectListItem { Value = "Canceled", Text = "Canceled" }
-            };
+        new SelectListItem { Value = "Active", Text = "Automatic" },
+        new SelectListItem { Value = "Canceled", Text = "Canceled" }
+    };
             ViewData["Status"] = new SelectList(statuses, "Value", "Text", tournament.Status);
             return View(tournament);
         }
