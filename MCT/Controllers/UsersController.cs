@@ -46,7 +46,6 @@ namespace MCT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("UserId,Username,Email,PasswordHash,Role")] User user)
         {
-            // Перевірка на унікальність імені
             if (_context.Users.Any(u => u.Username == user.Username))
             {
                 ModelState.AddModelError("Username", "Користувач з таким ім'ям вже існує.");
@@ -79,10 +78,15 @@ namespace MCT.Controllers
         {
             if (id != user.UserId) return NotFound();
 
-            // Перевірка на унікальність імені для інших юзерів (окрім поточного)
             if (_context.Users.Any(u => u.Username == user.Username && u.UserId != user.UserId))
             {
                 ModelState.AddModelError("Username", "Користувач з таким ім'ям вже існує.");
+            }
+
+            // Перевірка: не даємо змінити роль, якщо юзер вже є в Players
+            if (user.Role != "Player" && _context.Players.Any(p => p.UserId == user.UserId))
+            {
+                ModelState.AddModelError("Role", "Цей користувач зареєстрований як гравець команди. Змінити роль неможливо.");
             }
 
             if (ModelState.IsValid)
@@ -119,9 +123,28 @@ namespace MCT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user != null) _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            var user = await _context.Users
+                .Include(u => u.Players)
+                .Include(u => u.Tickets)
+                .Include(u => u.RoleNavigation)
+                .FirstOrDefaultAsync(m => m.UserId == id);
+
+            if (user != null)
+            {
+                List<string> dependencies = new List<string>();
+                if (user.Players.Any()) dependencies.Add("Гравцях (Players)");
+                if (user.Tickets.Any()) dependencies.Add("Квитках (Tickets)");
+
+                if (dependencies.Any())
+                {
+                    ViewBag.ErrorMessage = $"Не можна видалити, бо цей об'єкт задіяний в: {string.Join(", ", dependencies)}";
+                    return View(user);
+                }
+
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+            }
+
             return RedirectToAction(nameof(Index));
         }
 

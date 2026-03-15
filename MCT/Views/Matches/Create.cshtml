@@ -1,69 +1,72 @@
 ﻿@model MCT.Models.Match
-
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "CREATE MATCH";
 }
 
-<h1>Create</h1>
-
-<h4>Match</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Tournament" class="control-label"></label>
-                <select asp-for="TournamentId" class="form-control" asp-items="ViewBag.Tournament">
-                    <option value="">-- Оберіть турнір --</option>
-                </select>
-                <span asp-validation-for="TournamentId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TeamA" class="control-label"></label>
-                <select asp-for="TeamAId" class="form-control" asp-items="ViewBag.TeamA">
-                    <option value="">-- Оберіть команду А --</option>
+<div class="page-container mx-auto" style="max-width: 600px;">
+    <h2 class="mb-4 text-val-red">CREATE MATCH</h2>
+    
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="TeamAId" class="control-label">TEAM A</label>
+                <select asp-for="TeamAId" class="form-select" asp-items="ViewBag.TeamA">
+                    <option value="">-- SELECT TEAM A --</option>
                 </select>
                 <span asp-validation-for="TeamAId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="TeamB" class="control-label"></label>
-                <select asp-for="TeamBId" class="form-control" asp-items="ViewBag.TeamB">
-                    <option value="">-- Оберіть команду Б --</option>
+            <div class="col-md-6 mb-3">
+                <label asp-for="TeamBId" class="control-label">TEAM B</label>
+                <select asp-for="TeamBId" class="form-select" asp-items="ViewBag.TeamB">
+                    <option value="">-- SELECT TEAM B --</option>
                 </select>
                 <span asp-validation-for="TeamBId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ScheduledAt" class="control-label"></label>
-                <input asp-for="ScheduledAt" class="form-control" />
-                <span asp-validation-for="ScheduledAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ScoreA" class="control-label"></label>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="ScoreA" class="control-label">SCORE A</label>
                 <input asp-for="ScoreA" class="form-control" />
                 <span asp-validation-for="ScoreA" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ScoreB" class="control-label"></label>
+            <div class="col-md-6 mb-3">
+                <label asp-for="ScoreB" class="control-label">SCORE B</label>
                 <input asp-for="ScoreB" class="form-control" />
                 <span asp-validation-for="ScoreB" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="MatchType" class="control-label"></label>
-                <select asp-for="MatchType" class="form-control" asp-items="ViewBag.MatchType">
-                    <option value="">-- Оберіть тип матчу --</option>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="TournamentId" class="control-label">TOURNAMENT</label>
+            <select asp-for="TournamentId" class="form-select" asp-items="ViewBag.Tournament">
+                <option value="">-- SELECT TOURNAMENT --</option>
+            </select>
+            <span asp-validation-for="TournamentId" class="text-danger"></span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="ScheduledAt" class="control-label">DATE & TIME</label>
+                <input asp-for="ScheduledAt" class="form-control" />
+                <span asp-validation-for="ScheduledAt" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-4">
+                <label asp-for="MatchType" class="control-label">MATCH TYPE</label>
+                <select asp-for="MatchType" class="form-select" asp-items="ViewBag.MatchType">
+                    <option value="">-- SELECT TYPE --</option>
                 </select>
                 <span asp-validation-for="MatchType" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
+        </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+        <div class="d-flex justify-content-between align-items-center mt-2">
+            <a asp-action="Index" class="btn-outline-val border-0 px-0">CANCEL</a>
+            <input type="submit" value="CREATE MATCH" class="btn btn-primary" />
+        </div>
+    </form>
 </div>
 
 @section Scripts {

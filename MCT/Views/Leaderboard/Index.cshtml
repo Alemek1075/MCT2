@@ -1,0 +1,40 @@
+﻿@model IEnumerable<MCT.Models.LeaderboardViewModel>
+@{
+    ViewData["Title"] = "LEADERBOARD";
+}
+
+<div class="d-flex justify-content-between align-items-end mb-3 mt-3">
+    <h2 class="mb-0 text-white">GLOBAL POWER RANKINGS</h2>
+</div>
+
+<div class="page-container mt-0 p-4 mx-auto" style="max-width: 900px;">
+    <table class="table table-dark table-borderless table-hover mb-0 align-middle">
+        <thead>
+            <tr class="border-bottom border-secondary">
+                <th class="text-white text-center pb-3" style="width: 80px;">RANK</th>
+                <th class="text-white pb-3">TEAM</th>
+                <th class="text-white pb-3">TAG</th>
+                <th class="text-end text-white pb-3">ROUND DIFF</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int rank = 1;
+            }
+            @foreach (var team in Model)
+            {
+                <tr>
+                    <td class="text-center text-white fw-bold fs-4">@rank</td>
+                    <td class="fw-bold fs-5">
+                        <a asp-controller="Teams" asp-action="Details" asp-route-id="@team.TeamId" class="text-white text-decoration-none hover-val-red">
+                            @team.TeamName
+                        </a>
+                    </td>
+                    <td><span class="badge bg-dark border border-secondary fs-6 text-white">@team.ShortCode</span></td>
+                    <td class="text-end text-val-orange fw-bold fs-4">@(team.Diff > 0 ? "+" + team.Diff : team.Diff)</td>
+                </tr>
+                rank++;
+            }
+        </tbody>
+    </table>
+</div>

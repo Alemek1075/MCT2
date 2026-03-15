@@ -58,10 +58,7 @@ namespace MCT.Controllers
             do
             {
                 char[] digits = new char[15];
-                for (int i = 0; i < 15; i++)
-                {
-                    digits[i] = (char)('0' + random.Next(0, 10));
-                }
+                for (int i = 0; i < 15; i++) digits[i] = (char)('0' + random.Next(0, 10));
                 newQrCode = new string(digits);
                 exists = _context.Tickets.Any(t => t.QrCode == newQrCode);
             } while (exists);
@@ -73,19 +70,17 @@ namespace MCT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TicketId,UserId,TournamentId,PurchaseDate,Status")] Ticket ticket)
         {
-            // Перевірка дати купівлі квитка відносно дати завершення турніру (AsNoTracking щоб уникнути конфлікту EF)
+            if (ticket.PurchaseDate.HasValue)
+            {
+                ticket.PurchaseDate = DateTime.SpecifyKind(ticket.PurchaseDate.Value, DateTimeKind.Utc);
+            }
+
             if (ticket.TournamentId.HasValue && ticket.PurchaseDate.HasValue)
             {
-                var tournament = await _context.Tournaments
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(t => t.TournamentId == ticket.TournamentId);
-
-                if (tournament != null && tournament.EndDate.HasValue)
+                var tournament = await _context.Tournaments.AsNoTracking().FirstOrDefaultAsync(t => t.TournamentId == ticket.TournamentId);
+                if (tournament != null && tournament.EndDate.HasValue && ticket.PurchaseDate.Value.Date > tournament.EndDate.Value.Date)
                 {
-                    if (ticket.PurchaseDate.Value > tournament.EndDate.Value)
-                    {
-                        ModelState.AddModelError("PurchaseDate", "Дата купівлі квитка не може бути пізнішою за дату завершення турніру.");
-                    }
+                    ModelState.AddModelError("PurchaseDate", "Purchase date cannot be later than the event's end date.");
                 }
             }
 
@@ -121,25 +116,22 @@ namespace MCT.Controllers
         {
             if (id != ticket.TicketId) return NotFound();
 
-            // Перевірка на унікальність QrCode
-            if (_context.Tickets.Any(t => t.QrCode == ticket.QrCode && t.TicketId != ticket.TicketId))
+            if (ticket.PurchaseDate.HasValue)
             {
-                ModelState.AddModelError("QrCode", "Квиток із таким QrCode вже існує.");
+                ticket.PurchaseDate = DateTime.SpecifyKind(ticket.PurchaseDate.Value, DateTimeKind.Utc);
             }
 
-            // Перевірка дати купівлі квитка відносно дати завершення турніру (AsNoTracking)
+            if (_context.Tickets.Any(t => t.QrCode == ticket.QrCode && t.TicketId != ticket.TicketId))
+            {
+                ModelState.AddModelError("QrCode", "This QR Code is already in use.");
+            }
+
             if (ticket.TournamentId.HasValue && ticket.PurchaseDate.HasValue)
             {
-                var tournament = await _context.Tournaments
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(t => t.TournamentId == ticket.TournamentId);
-
-                if (tournament != null && tournament.EndDate.HasValue)
+                var tournament = await _context.Tournaments.AsNoTracking().FirstOrDefaultAsync(t => t.TournamentId == ticket.TournamentId);
+                if (tournament != null && tournament.EndDate.HasValue && ticket.PurchaseDate.Value.Date > tournament.EndDate.Value.Date)
                 {
-                    if (ticket.PurchaseDate.Value > tournament.EndDate.Value)
-                    {
-                        ModelState.AddModelError("PurchaseDate", "Дата купівлі квитка не може бути пізнішою за дату завершення турніру.");
-                    }
+                    ModelState.AddModelError("PurchaseDate", "Purchase date cannot be later than the event's end date.");
                 }
             }
 

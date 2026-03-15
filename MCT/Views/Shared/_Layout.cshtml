@@ -3,63 +3,49 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MCT</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - MCT ESPORTS</title>
+    
+    <link rel="icon" type="image/png" href="~/favicon.png" />
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/MCT.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <header class="sticky-top" style="z-index: 1050; background-color: #111111;">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark box-shadow py-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MCT</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/favicon.png" alt="MCT Logo" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" />
+                    <span>MCT ESPORTS</span>
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">User</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Players" asp-action="Index">Players</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Teams" asp-action="Index">Teams</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Matches" asp-action="Index">Matches</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Tournaments" asp-action="Index">Tournaments</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Tickets" asp-action="Index">Tickets</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                    <ul class="navbar-nav flex-grow-1 ms-4 gap-3">
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">HOME</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Tournaments" asp-action="Index">EVENTS</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Matches" asp-action="Index">MATCHES</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Teams" asp-action="Index">TEAMS</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Leaderboard" asp-action="Index">LEADERBOARD</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Players" asp-action="Index">PLAYERS</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Users" asp-action="Index">USERS</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Tickets" asp-action="Index">TICKETS</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    
+    <div class="main-content-wrapper">
+        <div class="container mt-4">
+            <main role="main" class="pb-5">
+                @RenderBody()
+            </main>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - MCT - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -1,32 +1,35 @@
 ﻿@model MCT.Models.Ticket
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "TICKET DETAILS";
 }
 
-<h1>Details</h1>
+<div class="page-container mx-auto" style="max-width: 600px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0 text-val-red">TICKET DETAILS</h2>
+        <a asp-action="Index" class="btn-outline-val">BACK TO LIST</a>
+    </div>
 
-<div>
-    <h4>Ticket</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.PurchaseDate)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(model => model.PurchaseDate)</dd>
-        
-        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.QrCode)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(model => model.QrCode)</dd>
-        
-        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Status)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(model => model.Status)</dd>
-        
-        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Tournament)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(model => model.Tournament.Description)</dd>
-        
-        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.User)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(model => model.User.Username)</dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.TicketId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div class="text-center mb-5 mt-4">
+        <h2 class="text-white fw-bold mb-0">@(Model.Tournament?.Description ?? "TBD")</h2>
+        <h4 class="text-val-orange mt-2">USER // @(Model.User?.Username ?? "TBD")</h4>
+    </div>
+
+    <div class="row text-center mt-4 border-top border-secondary pt-4">
+        <div class="col-6 border-end border-secondary mb-4">
+            <label>PURCHASE DATE</label>
+            <h4 class="text-white mt-2">@(Model.PurchaseDate?.ToString("MM/dd/yyyy HH:mm") ?? "TBD")</h4>
+        </div>
+        <div class="col-6 mb-4">
+            <label>STATUS</label>
+            <h4 class="text-val-red mt-2">@(Model.Status ?? "TBD")</h4>
+        </div>
+        <div class="col-12 mt-2">
+            <label>QR CODE</label>
+            <h3 class="text-val-orange font-monospace mt-2">@Model.QrCode</h3>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a asp-action="Edit" asp-route-id="@Model?.TicketId" class="btn btn-primary btn-lg w-100">EDIT TICKET DATA</a>
+    </div>
 </div>

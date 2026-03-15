@@ -1,40 +1,41 @@
 ﻿@model IEnumerable<MCT.Models.Ticket>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "TICKETS";
 }
 
-<h1>Index</h1>
+<div class="d-flex justify-content-between align-items-end mb-3 mt-3">
+    <h2 class="mb-0 text-white">TICKETS</h2>
+    <a asp-action="Create" class="btn-outline-val">CREATE NEW</a>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.PurchaseDate)</th>
-            <th>@Html.DisplayNameFor(model => model.QrCode)</th>
-            <th>@Html.DisplayNameFor(model => model.Status)</th>
-            <th>@Html.DisplayNameFor(model => model.Tournament)</th>
-            <th>@Html.DisplayNameFor(model => model.User)</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<div class="page-container mt-0 p-4">
+    <table class="table table-dark table-borderless table-hover mb-0 align-middle">
+        <thead>
             <tr>
-                <td>@Html.DisplayFor(modelItem => item.PurchaseDate)</td>
-                <td>@Html.DisplayFor(modelItem => item.QrCode)</td>
-                <td>@Html.DisplayFor(modelItem => item.Status)</td>
-                <td>@Html.DisplayFor(modelItem => item.Tournament.Description)</td>
-                <td>@Html.DisplayFor(modelItem => item.User.Username)</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.TicketId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.TicketId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.TicketId">Delete</a>
-                </td>
+                <th class="text-white">USER</th>
+                <th class="text-white">EVENT</th>
+                <th class="text-white">STATUS</th>
+                <th class="text-white">PURCHASE DATE</th>
+                <th class="text-white">QR CODE</th>
+                <th class="text-end text-white">ACTIONS</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="text-white fs-6">@(item.User?.Username ?? "TBD")</td>
+                    <td class="fw-bold fs-5 text-white">@(item.Tournament?.Description ?? "TBD")</td>
+                    <td><span class="badge bg-dark border border-secondary fs-6 text-white">@(item.Status ?? "TBD")</span></td>
+                    <td class="text-white fs-6">@(item.PurchaseDate?.ToString("MM/dd/yyyy HH:mm") ?? "TBD")</td>
+                    <td class="font-monospace text-val-orange fs-6">@Html.DisplayFor(modelItem => item.QrCode)</td>
+                    <td class="text-end action-links">
+                        <a asp-action="Edit" asp-route-id="@item.TicketId">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.TicketId">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.TicketId" class="text-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

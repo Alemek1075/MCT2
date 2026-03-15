@@ -26,19 +26,14 @@ namespace MCT.Controllers
 
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var player = await _context.Players
                 .Include(p => p.Team)
                 .Include(p => p.User)
                 .FirstOrDefaultAsync(m => m.PlayerId == id);
-            if (player == null)
-            {
-                return NotFound();
-            }
+
+            if (player == null) return NotFound();
 
             return View(player);
         }
@@ -54,6 +49,19 @@ namespace MCT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("PlayerId,UserId,TeamId")] Player player)
         {
+            if (player.TeamId.HasValue)
+            {
+                var team = await _context.Teams
+                    .Include(t => t.Players)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(t => t.TeamId == player.TeamId);
+
+                if (team != null && team.MemberCount.HasValue && team.Players.Count >= team.MemberCount.Value)
+                {
+                    ModelState.AddModelError("TeamId", $"This team already has the maximum number of players ({team.MemberCount.Value}).");
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(player);
@@ -67,16 +75,11 @@ namespace MCT.Controllers
 
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var player = await _context.Players.FindAsync(id);
-            if (player == null)
-            {
-                return NotFound();
-            }
+            if (player == null) return NotFound();
+
             ViewData["Team"] = new SelectList(_context.Teams, "TeamId", "Name", player.TeamId);
             ViewData["User"] = new SelectList(_context.Users.Where(u => u.Role == "Player"), "UserId", "Username", player.UserId);
             return View(player);
@@ -86,9 +89,21 @@ namespace MCT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("PlayerId,UserId,TeamId")] Player player)
         {
-            if (id != player.PlayerId)
+            if (id != player.PlayerId) return NotFound();
+
+            if (player.TeamId.HasValue)
             {
-                return NotFound();
+                var team = await _context.Teams
+                    .Include(t => t.Players)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(t => t.TeamId == player.TeamId);
+
+                var currentPlayersCount = team?.Players.Count(p => p.PlayerId != player.PlayerId) ?? 0;
+
+                if (team != null && team.MemberCount.HasValue && currentPlayersCount >= team.MemberCount.Value)
+                {
+                    ModelState.AddModelError("TeamId", $"This team already has the maximum number of players ({team.MemberCount.Value}).");
+                }
             }
 
             if (ModelState.IsValid)
@@ -100,14 +115,8 @@ namespace MCT.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PlayerExists(player.PlayerId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!PlayerExists(player.PlayerId)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -118,19 +127,14 @@ namespace MCT.Controllers
 
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var player = await _context.Players
                 .Include(p => p.Team)
                 .Include(p => p.User)
                 .FirstOrDefaultAsync(m => m.PlayerId == id);
-            if (player == null)
-            {
-                return NotFound();
-            }
+
+            if (player == null) return NotFound();
 
             return View(player);
         }
@@ -140,10 +144,7 @@ namespace MCT.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var player = await _context.Players.FindAsync(id);
-            if (player != null)
-            {
-                _context.Players.Remove(player);
-            }
+            if (player != null) _context.Players.Remove(player);
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

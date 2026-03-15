@@ -1,42 +1,39 @@
 ﻿@model MCT.Models.User
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "USER DETAILS";
 }
 
-<h1>Details</h1>
+<div class="page-container mx-auto" style="max-width: 600px;">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary pb-3">
+        <h3 class="mb-0 text-val-red">USER DETAILS</h3>
+        <a asp-action="Index" class="btn-outline-val" style="font-size: 1rem;">BACK TO LIST</a>
+    </div>
 
-<div>
-    <h4>User</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Username)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Username)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PasswordHash)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PasswordHash)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RoleNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RoleNavigation.RoleName)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.UserId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div class="text-center mb-5 mt-4">
+        <h1 class="display-4 text-white fw-bold mb-0">@Model.Username</h1>
+        @{
+            string roleColor = "text-val-orange";
+            if (Model.RoleNavigation?.RoleName == "Admin") roleColor = "text-danger";
+            else if (Model.RoleNavigation?.RoleName == "Player") roleColor = "text-success";
+            else if (Model.RoleNavigation?.RoleName == "User") roleColor = "text-info";
+        }
+        <h3 class="@roleColor mt-2" style="font-family: 'Bebas Neue', sans-serif;">
+            @Model.RoleNavigation?.RoleName
+        </h3>
+    </div>
+
+    <div class="row text-center mt-4">
+        <div class="col-12 border-bottom border-secondary mb-4 pb-3">
+            <label class="text-white fw-bold d-block mb-1 text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">EMAIL</label>
+            <h4 class="text-white mt-2">@Model.Email</h4>
+        </div>
+        <div class="col-12 mb-4">
+            <label class="text-white fw-bold d-block mb-1 text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">PASSWORD HASH</label>
+            <h4 class="text-white mt-2">********</h4>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a asp-action="Edit" asp-route-id="@Model?.UserId" class="btn btn-primary btn-lg w-100">EDIT USER DATA</a>
+    </div>
 </div>

@@ -1,42 +1,51 @@
 ﻿@model IEnumerable<MCT.Models.Tournament>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "EVENTS";
 }
 
-<h1>Index</h1>
+<div class="d-flex justify-content-between align-items-end mb-3 mt-3">
+    <h2 class="mb-0 text-white">EVENTS</h2>
+    <a asp-action="Create" class="btn-outline-val">CREATE NEW</a>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.Description)</th>
-            <th>@Html.DisplayNameFor(model => model.Location)</th>
-            <th>@Html.DisplayNameFor(model => model.StartDate)</th>
-            <th>@Html.DisplayNameFor(model => model.EndDate)</th>
-            <th>@Html.DisplayNameFor(model => model.Price)</th>
-            <th>@Html.DisplayNameFor(model => model.Status)</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<div class="page-container mt-0 p-4">
+    <table class="table table-dark table-borderless table-hover mb-0 align-middle">
+        <thead>
             <tr>
-                <td>@Html.DisplayFor(modelItem => item.Description)</td>
-                <td>@Html.DisplayFor(modelItem => item.Location)</td>
-                <td>@Html.DisplayFor(modelItem => item.StartDate)</td>
-                <td>@Html.DisplayFor(modelItem => item.EndDate)</td>
-                <td>@Html.DisplayFor(modelItem => item.Price)</td>
-                <td>@Html.DisplayFor(modelItem => item.Status)</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.TournamentId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.TournamentId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.TournamentId">Delete</a>
-                </td>
+                <th class="text-white">EVENT NAME</th>
+                <th class="text-white">LOCATION</th>
+                <th class="text-white">START DATE</th>
+                <th class="text-white">END DATE</th>
+                <th class="text-center text-white">PRIZE</th>
+                <th class="text-white">STATUS</th>
+                <th class="text-end text-white">ACTIONS</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                string visualStatus = "ONGOING";
+                var today = DateTime.UtcNow.Date;
+                if (item.Status == "Canceled") visualStatus = "CANCELED";
+                else if (item.EndDate.HasValue && item.EndDate.Value.Date < today) visualStatus = "COMPLETED";
+                else if (item.StartDate.HasValue && item.StartDate.Value.Date > today) visualStatus = "PLANNED";
+
+                string statusColor = visualStatus == "CANCELED" ? "text-danger" : (visualStatus == "ONGOING" ? "text-val-orange" : (visualStatus == "COMPLETED" ? "text-success" : "text-info"));
+
+                <tr>
+                    <td class="fw-bold fs-5 text-white">@Html.DisplayFor(modelItem => item.Description)</td>
+                    <td class="text-white fs-6">@Html.DisplayFor(modelItem => item.Location)</td>
+                    <td class="text-white fs-6">@(item.StartDate?.ToString("MM/dd/yyyy") ?? "TBD")</td>
+                    <td class="text-white fs-6">@(item.EndDate?.ToString("MM/dd/yyyy") ?? "TBD")</td>
+                    <td class="text-center text-val-orange fw-normal fs-5">$@(item.Price ?? 0)</td>
+                    <td><span class="badge bg-dark border border-secondary fs-6 @statusColor">@visualStatus</span></td>
+                    <td class="text-end action-links">
+                        <a asp-action="Edit" asp-route-id="@item.TournamentId">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.TournamentId">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.TournamentId" class="text-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

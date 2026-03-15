@@ -6,35 +6,24 @@
 
 <h1>Delete</h1>
 
+@if (ViewBag.ErrorMessage != null)
+{
+    <h4 class="text-danger"><strong>@ViewBag.ErrorMessage</strong></h4>
+}
+
 <h3>Are you sure you want to delete this?</h3>
 <div>
     <h4>Team</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ShortCode)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ShortCode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Region)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Region)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MemberCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MemberCount)
-        </dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Name)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Name)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.ShortCode)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.ShortCode)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Region)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Region)</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.MemberCount)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.MemberCount)</dd>
     </dl>
     
     <form asp-action="Delete">

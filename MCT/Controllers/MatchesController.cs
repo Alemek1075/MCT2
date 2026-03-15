@@ -59,6 +59,30 @@ namespace MCT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("MatchId,TournamentId,TeamAId,TeamBId,ScheduledAt,ScoreA,ScoreB,MatchType")] Match match)
         {
+            if (match.TeamAId.HasValue && match.TeamBId.HasValue && match.TeamAId == match.TeamBId)
+            {
+                ModelState.AddModelError("TeamBId", "A team cannot play against itself.");
+            }
+
+            if (match.TournamentId.HasValue && match.ScheduledAt.HasValue)
+            {
+                var tournament = await _context.Tournaments
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(t => t.TournamentId == match.TournamentId);
+
+                if (tournament != null && tournament.StartDate.HasValue && tournament.EndDate.HasValue)
+                {
+                    var matchDate = match.ScheduledAt.Value.Date;
+                    var startDate = tournament.StartDate.Value.Date;
+                    var endDate = tournament.EndDate.Value.Date;
+
+                    if (matchDate < startDate || matchDate > endDate)
+                    {
+                        ModelState.AddModelError("ScheduledAt", $"Date must be between {startDate:MM/dd/yyyy} and {endDate:MM/dd/yyyy}.");
+                    }
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 int scoreA = match.ScoreA ?? 0;
@@ -72,6 +96,7 @@ namespace MCT.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["MatchType"] = new SelectList(_context.MatchTypes, "TypeName", "TypeName", match.MatchType);
             ViewData["TeamA"] = new SelectList(_context.Teams, "TeamId", "Name", match.TeamAId);
             ViewData["TeamB"] = new SelectList(_context.Teams, "TeamId", "Name", match.TeamBId);
@@ -99,6 +124,30 @@ namespace MCT.Controllers
         {
             if (id != match.MatchId) return NotFound();
 
+            if (match.TeamAId.HasValue && match.TeamBId.HasValue && match.TeamAId == match.TeamBId)
+            {
+                ModelState.AddModelError("TeamBId", "A team cannot play against itself.");
+            }
+
+            if (match.TournamentId.HasValue && match.ScheduledAt.HasValue)
+            {
+                var tournament = await _context.Tournaments
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(t => t.TournamentId == match.TournamentId);
+
+                if (tournament != null && tournament.StartDate.HasValue && tournament.EndDate.HasValue)
+                {
+                    var matchDate = match.ScheduledAt.Value.Date;
+                    var startDate = tournament.StartDate.Value.Date;
+                    var endDate = tournament.EndDate.Value.Date;
+
+                    if (matchDate < startDate || matchDate > endDate)
+                    {
+                        ModelState.AddModelError("ScheduledAt", $"Date must be between {startDate:MM/dd/yyyy} and {endDate:MM/dd/yyyy}.");
+                    }
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 try
@@ -120,6 +169,7 @@ namespace MCT.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["MatchType"] = new SelectList(_context.MatchTypes, "TypeName", "TypeName", match.MatchType);
             ViewData["TeamA"] = new SelectList(_context.Teams, "TeamId", "Name", match.TeamAId);
             ViewData["TeamB"] = new SelectList(_context.Teams, "TeamId", "Name", match.TeamBId);

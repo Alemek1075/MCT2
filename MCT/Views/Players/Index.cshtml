@@ -1,41 +1,35 @@
 ﻿@model IEnumerable<MCT.Models.Player>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "PLAYERS";
 }
 
-<h1>Index</h1>
+<div class="d-flex justify-content-between align-items-end mb-3 mt-3">
+    <h2 class="mb-0 text-white">PLAYERS</h2>
+    <a asp-action="Create" class="btn-outline-val">CREATE NEW</a>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.User)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Team)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.Username)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Team.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.PlayerId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.PlayerId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.PlayerId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="page-container mt-0 p-4">
+    <table class="table table-dark table-borderless table-hover mb-0 align-middle">
+        <thead>
+            <tr>
+                <th class="text-white">USER (ACCOUNT)</th>
+                <th class="text-white">TEAM</th>
+                <th class="text-end text-white">ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="fw-bold fs-5 text-white">@(item.User?.Username ?? "TBD")</td>
+                    <td class="text-white fs-6">@(item.Team?.Name ?? "TBD")</td>
+                    <td class="text-end action-links">
+                        <a asp-action="Edit" asp-route-id="@item.PlayerId">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.PlayerId">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.PlayerId" class="text-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

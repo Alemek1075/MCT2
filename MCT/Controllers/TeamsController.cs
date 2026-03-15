@@ -18,39 +18,30 @@ namespace MCT.Controllers
             _context = context;
         }
 
-        // GET: Teams
         public async Task<IActionResult> Index()
         {
             return View(await _context.Teams.ToListAsync());
         }
 
-        // GET: Teams/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var team = await _context.Teams
+                .Include(t => t.Players)
+                    .ThenInclude(p => p.User)
                 .FirstOrDefaultAsync(m => m.TeamId == id);
-            if (team == null)
-            {
-                return NotFound();
-            }
+
+            if (team == null) return NotFound();
 
             return View(team);
         }
 
-        // GET: Teams/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Teams/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TeamId,Name,ShortCode,Region,MemberCount")] Team team)
@@ -64,33 +55,20 @@ namespace MCT.Controllers
             return View(team);
         }
 
-        // GET: Teams/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var team = await _context.Teams.FindAsync(id);
-            if (team == null)
-            {
-                return NotFound();
-            }
+            if (team == null) return NotFound();
             return View(team);
         }
 
-        // POST: Teams/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("TeamId,Name,ShortCode,Region,MemberCount")] Team team)
         {
-            if (id != team.TeamId)
-            {
-                return NotFound();
-            }
+            if (id != team.TeamId) return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -101,50 +79,53 @@ namespace MCT.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TeamExists(team.TeamId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!TeamExists(team.TeamId)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
             return View(team);
         }
 
-        // GET: Teams/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var team = await _context.Teams
-                .FirstOrDefaultAsync(m => m.TeamId == id);
-            if (team == null)
-            {
-                return NotFound();
-            }
+            var team = await _context.Teams.FirstOrDefaultAsync(m => m.TeamId == id);
+            if (team == null) return NotFound();
 
             return View(team);
         }
 
-        // POST: Teams/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var team = await _context.Teams.FindAsync(id);
+            var team = await _context.Teams
+                .Include(t => t.MatchTeamAs)
+                .Include(t => t.MatchTeamBs)
+                .Include(t => t.MatchWinners)
+                .Include(t => t.Players)
+                .Include(t => t.TournamentTeams)
+                .FirstOrDefaultAsync(m => m.TeamId == id);
+
             if (team != null)
             {
+                List<string> dependencies = new List<string>();
+                if (team.MatchTeamAs.Any() || team.MatchTeamBs.Any() || team.MatchWinners.Any()) dependencies.Add("Matches");
+                if (team.Players.Any()) dependencies.Add("Players");
+                if (team.TournamentTeams.Any()) dependencies.Add("TournamentTeams");
+
+                if (dependencies.Any())
+                {
+                    ViewBag.ErrorMessage = $"Cannot delete because this object is used in: {string.Join(", ", dependencies)}";
+                    return View(team);
+                }
+
                 _context.Teams.Remove(team);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

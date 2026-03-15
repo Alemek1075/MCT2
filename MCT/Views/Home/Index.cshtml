@@ -1,8 +1,176 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<MCT.Models.Match>
+@{
+    ViewData["Title"] = "HOME";
+    bool anchorSet = false;
+
+    var rankingsList = (ViewBag.Rankings as IEnumerable<MCT.Models.LeaderboardViewModel>)?.ToList() ?? new List<MCT.Models.LeaderboardViewModel>();
+    var topTeams = rankingsList.Take(3).ToList();
+
+    int maxRounds = 0;
+    foreach (var team in topTeams)
+    {
+        maxRounds = Math.Max(maxRounds, Math.Max(team.WonRounds, team.LostRounds));
+    }
+
+    int chartMax = (int)(maxRounds * 1.1);
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="d-flex justify-content-center align-items-center flex-column mb-4 pt-4 mt-2">
+    <h1 class="text-white m-0" style="font-family: 'Bebas Neue', sans-serif; font-size: 4rem; line-height: 1.2;">LIVE EVENTS</h1>
 </div>
+
+<div class="d-flex mx-auto" style="max-width: 1400px; gap: 30px; height: calc(100vh - 240px);">
+
+    <div style="width: 350px; flex-shrink: 0; align-self: flex-start;">
+        <div class="val-card-chart p-4">
+            <h3 class="text-white mb-0" style="font-family: 'Bebas Neue', sans-serif; font-size: 2rem;">ROUNDS STATISTICS</h3>
+            <p class="text-muted text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">TOP 3 TEAMS // WON VS LOST</p>
+
+            <div class="chart-area">
+                <div class="y-axis">
+                    <span>0</span>
+                    <span>@(chartMax / 2)</span>
+                    <span>@chartMax</span>
+                </div>
+
+                <div class="chart-team-bars">
+                    @for (int i = 0; i < 3; i++)
+                    {
+                        if (i < topTeams.Count)
+                        {
+                            var team = topTeams[i];
+                            
+                            double wonPercentage = chartMax > 0 ? (double)team.WonRounds / chartMax * 100 : 0;
+                            double lostPercentage = chartMax > 0 ? (double)team.LostRounds / chartMax * 100 : 0;
+
+                            <div class="team-bar-group">
+                                <div class="bar-container">
+                                    <div class="bar won" style="height: @(wonPercentage)%;"></div>
+                                    <div class="bar lost" style="height: @(lostPercentage)%;"></div>
+                                </div>
+                                <span class="team-label">@team.TeamName</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="team-bar-group">
+                                <div class="bar-container">
+                                    <div class="bar won" style="height: 0%;"></div>
+                                    <div class="bar lost" style="height: 0%;"></div>
+                                </div>
+                                <span class="team-label text-muted">---</span>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="matches-scroll-container flex-grow-1" style="height: 100%; overflow-y: auto; padding-right: 15px;">
+        @if (!Model.Any())
+        {
+            <div class="text-center text-white mt-5">NO MATCHES SCHEDULED</div>
+        }
+        else
+        {
+            foreach (var match in Model)
+            {
+                bool isLive = false;
+                bool isUpcoming = false;
+
+                if (match.ScheduledAt.HasValue)
+                {
+                    var matchDate = match.ScheduledAt.Value.Date;
+                    var today = DateTime.UtcNow.Date;
+                    if (matchDate == today) isLive = true;
+                    else if (matchDate > today) isUpcoming = true;
+                }
+
+                string cardClass = isLive ? "val-card val-card-live" : "val-card";
+                string idAttr = (!anchorSet && (isLive || isUpcoming)) ? "id=\"scroll-anchor\"" : "";
+                if (idAttr != "") anchorSet = true;
+
+                <div @Html.Raw(idAttr) class="@cardClass mb-4 p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary">
+                        <span class="text-white fw-bold">
+                            @(isLive ? "🔴 LIVE TODAY" : match.ScheduledAt?.ToString("MM/dd/yyyy HH:mm") ?? "TBD")
+                        </span>
+                        <span class="badge bg-dark border border-secondary text-white px-3 py-2 rounded-pill">@(match.MatchType ?? "BO1")</span>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="text-end" style="flex: 1;">
+                            <h3 class="text-white m-0">@(match.TeamA?.Name ?? "TBD")</h3>
+                        </div>
+                        <div class="text-center px-4" style="min-width: 150px;">
+                            <h2 class="m-0" style="font-family: 'Bebas Neue', sans-serif; color: #ff4655; font-size: 3rem;">
+                                @(match.ScoreA ?? 0) <span class="text-secondary mx-1">-</span> @(match.ScoreB ?? 0)
+                            </h2>
+                            <div class="text-white text-uppercase mt-1" style="font-size: 0.85rem; letter-spacing: 1px;">
+                                @(match.Tournament?.Description ?? "TBD")
+                            </div>
+                        </div>
+                        <div class="text-start" style="flex: 1;">
+                            <h3 class="text-white m-0">@(match.TeamB?.Name ?? "TBD")</h3>
+                        </div>
+                        <div class="border-start border-secondary ps-4 ms-3">
+                            <a asp-controller="Matches" asp-action="Details" asp-route-id="@match.MatchId" class="btn-outline-val">VIEW DETAILS</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <div style="width: 350px; flex-shrink: 0; align-self: flex-start;">
+        <div class="val-card-leaderboard p-4 d-flex flex-column" style="height: 400px;">
+            <div>
+                <h3 class="text-white mb-0" style="font-family: 'Bebas Neue', sans-serif; font-size: 2rem;">GLOBAL RANKINGS</h3>
+                <p class="text-muted text-uppercase mb-4" style="font-size: 0.75rem; letter-spacing: 1px;">POWERED BY ROUND DIFF</p>
+
+                <table class="table table-dark table-borderless mb-0 align-middle">
+                    <tbody>
+                        @{
+                            for (int i = 0; i < 3; i++)
+                            {
+                                int rank = i + 1;
+                                <tr class="border-bottom border-secondary" style="height: 60px;">
+                                    @if (i < topTeams.Count)
+                                    {
+                                        var team = topTeams[i];
+                                        <td class="text-white fw-bold fs-4" style="width: 40px;">@rank</td>
+                                        <td class="fw-bold fs-4">
+                                            <a asp-controller="Teams" asp-action="Details" asp-route-id="@team.TeamId" class="text-white text-decoration-none hover-val-red">@team.TeamName</a>
+                                        </td>
+                                        <td class="text-end text-val-orange fw-bold fs-4">@(team.Diff > 0 ? "+" + team.Diff : team.Diff)</td>
+                                    }
+                                    else
+                                    {
+                                        <td class="text-muted fw-bold fs-4" style="width: 40px;">@rank</td>
+                                        <td class="fw-bold fs-4 text-muted">---</td>
+                                        <td class="text-end text-muted fw-bold fs-4">---</td>
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-auto pt-2 text-center">
+                <a asp-controller="Leaderboard" asp-action="Index" class="btn-outline-val w-100 d-block">VIEW FULL RANKINGS</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var anchor = document.getElementById("scroll-anchor");
+            if (anchor) setTimeout(() => { anchor.scrollIntoView({ behavior: "smooth", block: "center" }); }, 100);
+        });
+    </script>
+}

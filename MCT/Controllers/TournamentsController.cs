@@ -39,7 +39,11 @@ namespace MCT.Controllers
 
         public IActionResult Create()
         {
-            ViewData["Status"] = new SelectList(_context.TournamentStatuses, "StatusName", "StatusName");
+            var statuses = new List<SelectListItem> {
+                new SelectListItem { Value = "Active", Text = "Automatic" },
+                new SelectListItem { Value = "Canceled", Text = "Canceled" }
+            };
+            ViewData["Status"] = new SelectList(statuses, "Value", "Text");
             return View();
         }
 
@@ -47,13 +51,20 @@ namespace MCT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TournamentId,Description,Location,StartDate,EndDate,Price,Status")] Tournament tournament)
         {
+            if (tournament.StartDate.HasValue) tournament.StartDate = DateTime.SpecifyKind(tournament.StartDate.Value, DateTimeKind.Utc);
+            if (tournament.EndDate.HasValue) tournament.EndDate = DateTime.SpecifyKind(tournament.EndDate.Value, DateTimeKind.Utc);
+
             if (ModelState.IsValid)
             {
                 _context.Add(tournament);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Status"] = new SelectList(_context.TournamentStatuses, "StatusName", "StatusName", tournament.Status);
+            var statuses = new List<SelectListItem> {
+                new SelectListItem { Value = "Active", Text = "Automatic" },
+                new SelectListItem { Value = "Canceled", Text = "Canceled" }
+            };
+            ViewData["Status"] = new SelectList(statuses, "Value", "Text", tournament.Status);
             return View(tournament);
         }
 
@@ -64,7 +75,11 @@ namespace MCT.Controllers
             var tournament = await _context.Tournaments.FindAsync(id);
             if (tournament == null) return NotFound();
 
-            ViewData["Status"] = new SelectList(_context.TournamentStatuses, "StatusName", "StatusName", tournament.Status);
+            var statuses = new List<SelectListItem> {
+                new SelectListItem { Value = "Active", Text = "Automatic" },
+                new SelectListItem { Value = "Canceled", Text = "Canceled" }
+            };
+            ViewData["Status"] = new SelectList(statuses, "Value", "Text", tournament.Status);
             return View(tournament);
         }
 
@@ -73,6 +88,24 @@ namespace MCT.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("TournamentId,Description,Location,StartDate,EndDate,Price,Status")] Tournament tournament)
         {
             if (id != tournament.TournamentId) return NotFound();
+
+            if (tournament.StartDate.HasValue) tournament.StartDate = DateTime.SpecifyKind(tournament.StartDate.Value, DateTimeKind.Utc);
+            if (tournament.EndDate.HasValue) tournament.EndDate = DateTime.SpecifyKind(tournament.EndDate.Value, DateTimeKind.Utc);
+
+            if (tournament.StartDate.HasValue && tournament.EndDate.HasValue)
+            {
+                bool invalidMatches = await _context.Matches
+                    .Where(m => m.TournamentId == tournament.TournamentId && m.ScheduledAt.HasValue)
+                    .AnyAsync(m => m.ScheduledAt.Value.Date < tournament.StartDate.Value.Date || m.ScheduledAt.Value.Date > tournament.EndDate.Value.Date);
+
+                if (invalidMatches) ModelState.AddModelError("StartDate", "Existing matches fall outside the new date range.");
+
+                bool invalidTickets = await _context.Tickets
+                    .Where(t => t.TournamentId == tournament.TournamentId && t.PurchaseDate.HasValue)
+                    .AnyAsync(t => t.PurchaseDate.Value.Date > tournament.EndDate.Value.Date);
+
+                if (invalidTickets) ModelState.AddModelError("EndDate", "Existing tickets have purchase dates after the new end date.");
+            }
 
             if (ModelState.IsValid)
             {
@@ -88,7 +121,11 @@ namespace MCT.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Status"] = new SelectList(_context.TournamentStatuses, "StatusName", "StatusName", tournament.Status);
+            var statuses = new List<SelectListItem> {
+                new SelectListItem { Value = "Active", Text = "Automatic" },
+                new SelectListItem { Value = "Canceled", Text = "Canceled" }
+            };
+            ViewData["Status"] = new SelectList(statuses, "Value", "Text", tournament.Status);
             return View(tournament);
         }
 
@@ -109,10 +146,30 @@ namespace MCT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var tournament = await _context.Tournaments.FindAsync(id);
-            if (tournament != null) _context.Tournaments.Remove(tournament);
+            var tournament = await _context.Tournaments
+                .Include(t => t.Matches)
+                .Include(t => t.Tickets)
+                .Include(t => t.TournamentTeams)
+                .Include(t => t.StatusNavigation)
+                .FirstOrDefaultAsync(m => m.TournamentId == id);
 
-            await _context.SaveChangesAsync();
+            if (tournament != null)
+            {
+                List<string> dependencies = new List<string>();
+                if (tournament.Matches.Any()) dependencies.Add("Matches");
+                if (tournament.Tickets.Any()) dependencies.Add("Tickets");
+                if (tournament.TournamentTeams.Any()) dependencies.Add("TournamentTeams");
+
+                if (dependencies.Any())
+                {
+                    ViewBag.ErrorMessage = $"Cannot delete because this object is used in: {string.Join(", ", dependencies)}";
+                    return View(tournament);
+                }
+
+                _context.Tournaments.Remove(tournament);
+                await _context.SaveChangesAsync();
+            }
+
             return RedirectToAction(nameof(Index));
         }
 

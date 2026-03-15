@@ -1,5 +1,4 @@
-using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,25 +6,17 @@ using MCT.Models;
 
 namespace MCT.Controllers
 {
-    public class HomeController : Controller
+    public class LeaderboardController : Controller
     {
         private readonly MctContext _context;
 
-        public HomeController(MctContext context)
+        public LeaderboardController(MctContext context)
         {
             _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            var matches = await _context.Matches
-                .Include(m => m.TeamA)
-                .Include(m => m.TeamB)
-                .Include(m => m.Tournament)
-                .Where(m => m.Tournament != null && m.Tournament.Status != "Canceled")
-                .OrderBy(m => m.ScheduledAt)
-                .ToListAsync();
-
             var teams = await _context.Teams
                 .Include(t => t.MatchTeamAs)
                 .Include(t => t.MatchTeamBs)
@@ -34,21 +25,17 @@ namespace MCT.Controllers
             var rankings = teams.Select(t => new LeaderboardViewModel
             {
                 TeamId = t.TeamId,
-                TeamName = t.ShortCode ?? t.Name ?? "TBD",
-                ShortCode = t.ShortCode ?? "TBD",
+                TeamName = t.Name ?? "TBD",
+                ShortCode = t.ShortCode ?? t.Name ?? "TBD",
                 WonRounds = t.MatchTeamAs.Sum(m => m.ScoreA ?? 0) + t.MatchTeamBs.Sum(m => m.ScoreB ?? 0),
                 LostRounds = t.MatchTeamAs.Sum(m => m.ScoreB ?? 0) + t.MatchTeamBs.Sum(m => m.ScoreA ?? 0),
                 Diff = (t.MatchTeamAs.Sum(m => m.ScoreA ?? 0) + t.MatchTeamBs.Sum(m => m.ScoreB ?? 0)) -
-                       (t.MatchTeamAs.Sum(m => m.ScoreB ?? 0) + t.MatchTeamBs.Sum(m => m.ScoreA ?? 0)),
-                MatchTeamAs = t.MatchTeamAs.ToList(),
-                MatchTeamBs = t.MatchTeamBs.ToList()
+                       (t.MatchTeamAs.Sum(m => m.ScoreB ?? 0) + t.MatchTeamBs.Sum(m => m.ScoreA ?? 0))
             })
             .OrderByDescending(x => x.Diff)
             .ToList();
 
-            ViewBag.Rankings = rankings;
-
-            return View(matches);
+            return View(rankings);
         }
     }
 }

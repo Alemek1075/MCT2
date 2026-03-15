@@ -1,53 +1,39 @@
 ﻿@model IEnumerable<MCT.Models.Team>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "TEAMS";
 }
 
-<h1>Index</h1>
+<div class="d-flex justify-content-between align-items-end mb-3 mt-3">
+    <h2 class="mb-0 text-white">TEAMS</h2>
+    <a asp-action="Create" class="btn-outline-val">CREATE NEW</a>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ShortCode)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Region)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MemberCount)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ShortCode)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Region)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MemberCount)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.TeamId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.TeamId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.TeamId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="page-container mt-0 p-4">
+    <table class="table table-dark table-borderless table-hover mb-0 align-middle">
+        <thead>
+            <tr>
+                <th class="text-white">TEAM NAME</th>
+                <th class="text-white">TAG</th>
+                <th class="text-white">REGION</th>
+                <th class="text-center text-white">MEMBERS</th>
+                <th class="text-end text-white">ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="fw-bold fs-5 text-white">@Html.DisplayFor(modelItem => item.Name)</td>
+                    <td><span class="badge bg-dark border border-secondary fs-6 text-white">@Html.DisplayFor(modelItem => item.ShortCode)</span></td>
+                    <td class="text-white fs-6">@Html.DisplayFor(modelItem => item.Region)</td>
+                    <td class="text-center text-val-red fw-normal fs-5">@(item.MemberCount ?? 0)</td>
+                    <td class="text-end action-links">
+                        <a asp-action="Edit" asp-route-id="@item.TeamId">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.TeamId">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.TeamId" class="text-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

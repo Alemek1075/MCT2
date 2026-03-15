@@ -8,22 +8,20 @@ public partial class User
 {
     public int UserId { get; set; }
 
-    [Required(ErrorMessage = "Поле Username є обов'язковим.")]
+    [Required(ErrorMessage = "Username field is required.")]
     public string? Username { get; set; }
 
-    [Required(ErrorMessage = "Поле Email є обов'язковим.")]
-    [EmailAddress(ErrorMessage = "Некоректний формат Email (має містити @ та домен).")]
+    [Required(ErrorMessage = "Email field is required.")]
+    [EmailAddress(ErrorMessage = "Invalid Email format (must contain @ and domain).")]
     public string? Email { get; set; }
 
-    [Required(ErrorMessage = "Поле Password Hash є обов'язковим.")]
+    [Required(ErrorMessage = "Password Hash field is required.")]
     public string? PasswordHash { get; set; }
 
-    [Required(ErrorMessage = "Роль є обов'язковою.")]
+    [Required(ErrorMessage = "Role field is required.")]
     public string? Role { get; set; }
 
     public virtual ICollection<Player> Players { get; set; } = new List<Player>();
-
     public virtual UserRole? RoleNavigation { get; set; }
-
     public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }
