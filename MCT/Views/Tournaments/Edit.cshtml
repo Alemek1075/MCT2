@@ -11,48 +11,47 @@
         <input type="hidden" asp-for="TournamentId" />
 
         <div class="mb-3">
-            <label asp-for="Description" class="form-label text-white fw-bold text-uppercase" style="font-size: 0.85rem;">EVENT NAME</label>
+            <label asp-for="Description" class="form-label">EVENT NAME</label>
             <input asp-for="Description" class="form-control" />
             <span asp-validation-for="Description" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
-            <label asp-for="Location" class="form-label text-white fw-bold text-uppercase" style="font-size: 0.85rem;">LOCATION</label>
+            <label asp-for="Location" class="form-label">LOCATION</label>
             <input asp-for="Location" class="form-control" />
             <span asp-validation-for="Location" class="text-danger"></span>
         </div>
 
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label asp-for="StartDate" class="form-label text-white fw-bold text-uppercase" style="font-size: 0.85rem;">START DATE</label>
+                <label asp-for="StartDate" class="form-label">START DATE</label>
                 <input asp-for="StartDate" class="form-control" type="date" />
                 <span asp-validation-for="StartDate" class="text-danger"></span>
             </div>
             <div class="col-md-6 mb-3">
-                <label asp-for="EndDate" class="form-label text-white fw-bold text-uppercase" style="font-size: 0.85rem;">END DATE</label>
+                <label asp-for="EndDate" class="form-label">END DATE</label>
                 <input asp-for="EndDate" class="form-control" type="date" />
                 <span asp-validation-for="EndDate" class="text-danger"></span>
             </div>
         </div>
 
         <div class="mb-3">
-            <label asp-for="Price" class="form-label text-white fw-bold text-uppercase" style="font-size: 0.85rem;">PRIZE</label>
+            <label class="form-label">PRIZE POOL</label>
             <div class="input-group">
                 <span class="input-group-text bg-dark border-secondary text-val-orange">$</span>
-                <input asp-for="Price" class="form-control" />
+                <input name="Price" id="Price" class="form-control" type="number" step="1" min="0" value="@(Model?.Price != null ? Math.Floor(Model.Price.Value).ToString("0") : "")" onkeydown="return event.key !== '.' && event.key !== ','" required />
             </div>
-            <span asp-validation-for="Price" class="text-danger"></span>
         </div>
 
         <div class="mb-4">
-            <label asp-for="Status" class="form-label text-white fw-bold text-uppercase" style="font-size: 0.85rem;">STATUS LOGIC</label>
+            <label asp-for="Status" class="form-label">STATUS LOGIC</label>
             <select asp-for="Status" class="form-select" asp-items="ViewBag.Status"></select>
             <span asp-validation-for="Status" class="text-danger"></span>
         </div>
 
-        <div class="d-flex gap-2 pt-2">
-            <button type="submit" class="btn btn-primary flex-grow-1">SAVE CHANGES</button>
-            <a asp-action="Index" class="btn-outline-val">BACK</a>
+        <div class="d-flex justify-content-end gap-3 pt-3">
+            <a asp-action="Index" class="btn-outline-val">CANCEL</a>
+            <button type="submit" class="btn btn-primary">SAVE CHANGES</button>
         </div>
     </form>
 </div>

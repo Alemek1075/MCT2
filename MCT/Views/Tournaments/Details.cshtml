@@ -1,49 +1,46 @@
 ﻿@model MCT.Models.Tournament
 @{
     ViewData["Title"] = "EVENT DETAILS";
-    string visualStatus = "ONGOING";
-    var today = DateTime.UtcNow.Date;
-    if (Model.Status == "Canceled") visualStatus = "CANCELED";
-    else if (Model.EndDate.HasValue && Model.EndDate.Value.Date < today) visualStatus = "COMPLETED";
-    else if (Model.StartDate.HasValue && Model.StartDate.Value.Date > today) visualStatus = "PLANNED";
-
-    string statusColor = visualStatus == "CANCELED" ? "text-danger" : (visualStatus == "ONGOING" ? "text-val-orange" : (visualStatus == "COMPLETED" ? "text-success" : "text-info"));
 }
 
-<div class="page-container mx-auto" style="max-width: 700px;">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary pb-3">
-        <h3 class="mb-0 text-val-red">EVENT DETAILS</h3>
-        <a asp-action="Index" class="btn-outline-val" style="font-size: 1rem;">BACK TO LIST</a>
+<div class="page-container mx-auto" style="max-width: 800px;">
+    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">EVENT DETAILS</h3>
+
+    <div class="p-4 mb-4" style="background-color: #111111; border-radius: 8px;">
+        <div class="row mb-4">
+            <div class="col-6 border-end border-secondary">
+                <label class="form-label text-muted d-block mb-1">EVENT NAME</label>
+                <span class="text-white fs-4 fw-bold">@Model.Description</span>
+            </div>
+            <div class="col-6 ps-4">
+                <label class="form-label text-muted d-block mb-1">LOCATION</label>
+                <span class="text-white fs-5">@Model.Location</span>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-6 border-end border-secondary">
+                <label class="form-label text-muted d-block mb-1">DATES</label>
+                <span class="text-white fs-5">@(Model.StartDate?.ToString("MM/dd/yyyy") ?? "TBD") - @(Model.EndDate?.ToString("MM/dd/yyyy") ?? "TBD")</span>
+            </div>
+            <div class="col-6 ps-4">
+                <label class="form-label text-muted d-block mb-1">STATUS</label>
+                <span class="badge bg-dark border border-secondary text-white fs-6">@Model.Status</span>
+            </div>
+        </div>
+
+        <div class="text-center pt-3 border-top border-secondary">
+            <label class="form-label text-muted d-block mb-1">PRIZE POOL</label>
+            <span class="text-val-orange fs-3 fw-bold font-monospace">$@(Math.Floor(Model.Price ?? 0))</span>
+        </div>
     </div>
 
-    <div class="text-center mb-4">
-        <h2 class="text-white fw-bold mb-1">@Model.Description</h2>
-        <h5 class="text-val-orange" style="font-family: 'Bebas Neue', sans-serif;">
-            LOCATION // @(Model.Location ?? "TBD")
-        </h5>
-    </div>
-
-    <div class="row text-center mt-4 p-3" style="background-color: #111111; border-radius: 8px;">
-        <div class="col-4 border-end border-secondary">
-            <label class="text-white fw-bold d-block mb-1 text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">START DATE</label>
-            <h6 class="text-white m-0 fs-5">@(Model.StartDate?.ToString("MM/dd/yyyy") ?? "TBD")</h6>
+    <div class="row pt-2">
+        <div class="col-6">
+            <a asp-action="Edit" asp-route-id="@Model?.TournamentId" class="btn btn-primary w-100">EDIT EVENT</a>
         </div>
-        <div class="col-4 border-end border-secondary">
-            <label class="text-white fw-bold d-block mb-1 text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">END DATE</label>
-            <h6 class="text-white m-0 fs-5">@(Model.EndDate?.ToString("MM/dd/yyyy") ?? "TBD")</h6>
+        <div class="col-6">
+            <a asp-action="Index" class="btn-outline-val w-100">BACK TO LIST</a>
         </div>
-        <div class="col-4">
-            <label class="text-white fw-bold d-block mb-1 text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">STATUS</label>
-            <h6 class="@statusColor fw-bold m-0 fs-5">@visualStatus</h6>
-        </div>
-    </div>
-    
-    <div class="text-center mt-4">
-        <label class="text-white fw-bold d-block mb-1 text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">PRIZE</label>
-        <h4 class="text-val-orange fw-normal m-0">$@(Model.Price ?? 0)</h4>
-    </div>
-
-    <div class="text-center mt-5">
-        <a asp-action="Edit" asp-route-id="@Model?.TournamentId" class="btn btn-primary" style="font-size: 1.1rem;">EDIT EVENT DATA</a>
     </div>
 </div>

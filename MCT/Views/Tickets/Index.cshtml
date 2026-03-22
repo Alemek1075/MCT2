@@ -14,8 +14,8 @@
             <tr>
                 <th class="text-white">USER</th>
                 <th class="text-white">EVENT</th>
-                <th class="text-white">STATUS</th>
                 <th class="text-white">PURCHASE DATE</th>
+                <th class="text-white">STATUS</th>
                 <th class="text-white">QR CODE</th>
                 <th class="text-end text-white">ACTIONS</th>
             </tr>
@@ -24,10 +24,10 @@
             @foreach (var item in Model)
             {
                 <tr>
-                    <td class="text-white fs-6">@(item.User?.Username ?? "TBD")</td>
+                    <td class="text-white fw-bold fs-6">@(item.User?.Username ?? "TBD")</td>
                     <td class="fw-bold fs-5 text-white">@(item.Tournament?.Description ?? "TBD")</td>
-                    <td><span class="badge bg-dark border border-secondary fs-6 text-white">@(item.Status ?? "TBD")</span></td>
                     <td class="text-white fs-6">@(item.PurchaseDate?.ToString("MM/dd/yyyy HH:mm") ?? "TBD")</td>
+                    <td><span class="badge bg-dark border border-secondary fs-6 text-white">@(item.Status ?? "TBD")</span></td>
                     <td class="font-monospace text-val-orange fs-6">@Html.DisplayFor(modelItem => item.QrCode)</td>
                     <td class="text-end action-links">
                         <a asp-action="Edit" asp-route-id="@item.TicketId">Edit</a>

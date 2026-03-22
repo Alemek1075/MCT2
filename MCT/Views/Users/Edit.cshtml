@@ -4,47 +4,39 @@
 }
 
 <div class="page-container mx-auto" style="max-width: 600px;">
-    <h2 class="mb-4 text-val-red">EDIT USER</h2>
-    
+    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">EDIT USER DATA</h3>
+
     <form asp-action="Edit">
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
         <input type="hidden" asp-for="UserId" />
-        
+
         <div class="mb-3">
-            <label asp-for="Username" class="control-label">USERNAME</label>
+            <label asp-for="Username" class="form-label">USERNAME</label>
             <input asp-for="Username" class="form-control" />
             <span asp-validation-for="Username" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
-            <label asp-for="Email" class="control-label">EMAIL</label>
-            <input asp-for="Email" class="form-control" />
+            <label asp-for="Email" class="form-label">EMAIL</label>
+            <input asp-for="Email" class="form-control" type="email" />
             <span asp-validation-for="Email" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
-            <label asp-for="PasswordHash" class="control-label">PASSWORD HASH</label>
+            <label asp-for="PasswordHash" class="form-label">PASSWORD</label>
             <input asp-for="PasswordHash" class="form-control" />
             <span asp-validation-for="PasswordHash" class="text-danger"></span>
         </div>
 
         <div class="mb-4">
-            <label asp-for="Role" class="control-label">ROLE</label>
-            <select asp-for="Role" class="form-select" asp-items="ViewBag.Role">
-                <option value="">-- SELECT ROLE --</option>
-            </select>
+            <label asp-for="Role" class="form-label">ROLE</label>
+            <select asp-for="Role" class="form-select" asp-items="ViewBag.Role"></select>
             <span asp-validation-for="Role" class="text-danger"></span>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-2">
-            <a asp-action="Index" class="btn-outline-val border-0 px-0">CANCEL</a>
-            <input type="submit" value="SAVE CHANGES" class="btn btn-primary" />
+        <div class="d-flex justify-content-end gap-3 pt-3">
+            <a asp-action="Index" class="btn-outline-val">CANCEL</a>
+            <button type="submit" class="btn btn-primary">SAVE CHANGES</button>
         </div>
     </form>
 </div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}

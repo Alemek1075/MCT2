@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -20,10 +19,7 @@ namespace MCT.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var mctContext = _context.Tickets
-                .Include(t => t.StatusNavigation)
-                .Include(t => t.Tournament)
-                .Include(t => t.User);
+            var mctContext = _context.Tickets.Include(t => t.Tournament).Include(t => t.User);
             return View(await mctContext.ToListAsync());
         }
 
@@ -32,7 +28,6 @@ namespace MCT.Controllers
             if (id == null) return NotFound();
 
             var ticket = await _context.Tickets
-                .Include(t => t.StatusNavigation)
                 .Include(t => t.Tournament)
                 .Include(t => t.User)
                 .FirstOrDefaultAsync(m => m.TicketId == id);
@@ -44,54 +39,35 @@ namespace MCT.Controllers
 
         public IActionResult Create()
         {
-            ViewData["Status"] = new SelectList(_context.TicketStatuses, "StatusName", "StatusName");
             ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "Description");
             ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username");
-            return View();
-        }
 
-        private string GenerateUniqueQrCode()
-        {
-            var random = new Random();
-            string newQrCode;
-            bool exists;
-            do
-            {
-                char[] digits = new char[15];
-                for (int i = 0; i < 15; i++) digits[i] = (char)('0' + random.Next(0, 10));
-                newQrCode = new string(digits);
-                exists = _context.Tickets.Any(t => t.QrCode == newQrCode);
-            } while (exists);
+            var statuses = new System.Collections.Generic.List<SelectListItem> {
+                new SelectListItem { Value = "Active", Text = "Active" },
+                new SelectListItem { Value = "Used", Text = "Used" },
+                new SelectListItem { Value = "Canceled", Text = "Canceled" }
+            };
+            ViewData["Status"] = new SelectList(statuses, "Value", "Text");
 
-            return newQrCode;
+            var newTicket = new Ticket { QrCode = GenerateUniqueQrCode() };
+            return View(newTicket);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TicketId,UserId,TournamentId,PurchaseDate,Status")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("TicketId,UserId,TournamentId,PurchaseDate,Status,QrCode")] Ticket ticket)
         {
-            if (ticket.PurchaseDate.HasValue)
-            {
-                ticket.PurchaseDate = DateTime.SpecifyKind(ticket.PurchaseDate.Value, DateTimeKind.Utc);
-            }
-
-            if (ticket.TournamentId.HasValue && ticket.PurchaseDate.HasValue)
-            {
-                var tournament = await _context.Tournaments.AsNoTracking().FirstOrDefaultAsync(t => t.TournamentId == ticket.TournamentId);
-                if (tournament != null && tournament.EndDate.HasValue && ticket.PurchaseDate.Value.Date > tournament.EndDate.Value.Date)
-                {
-                    ModelState.AddModelError("PurchaseDate", "Purchase date cannot be later than the event's end date.");
-                }
-            }
-
             if (ModelState.IsValid)
             {
-                ticket.QrCode = GenerateUniqueQrCode();
+                if (ticket.PurchaseDate.HasValue)
+                {
+                    ticket.PurchaseDate = DateTime.SpecifyKind(ticket.PurchaseDate.Value, DateTimeKind.Utc);
+                }
+
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Status"] = new SelectList(_context.TicketStatuses, "StatusName", "StatusName", ticket.Status);
             ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "Description", ticket.TournamentId);
             ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username", ticket.UserId);
             return View(ticket);
@@ -104,9 +80,16 @@ namespace MCT.Controllers
             var ticket = await _context.Tickets.FindAsync(id);
             if (ticket == null) return NotFound();
 
-            ViewData["Status"] = new SelectList(_context.TicketStatuses, "StatusName", "StatusName", ticket.Status);
             ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "Description", ticket.TournamentId);
             ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username", ticket.UserId);
+
+            var statuses = new System.Collections.Generic.List<SelectListItem> {
+                new SelectListItem { Value = "Active", Text = "Active" },
+                new SelectListItem { Value = "Used", Text = "Used" },
+                new SelectListItem { Value = "Canceled", Text = "Canceled" }
+            };
+            ViewData["Status"] = new SelectList(statuses, "Value", "Text", ticket.Status);
+
             return View(ticket);
         }
 
@@ -116,29 +99,15 @@ namespace MCT.Controllers
         {
             if (id != ticket.TicketId) return NotFound();
 
-            if (ticket.PurchaseDate.HasValue)
-            {
-                ticket.PurchaseDate = DateTime.SpecifyKind(ticket.PurchaseDate.Value, DateTimeKind.Utc);
-            }
-
-            if (_context.Tickets.Any(t => t.QrCode == ticket.QrCode && t.TicketId != ticket.TicketId))
-            {
-                ModelState.AddModelError("QrCode", "This QR Code is already in use.");
-            }
-
-            if (ticket.TournamentId.HasValue && ticket.PurchaseDate.HasValue)
-            {
-                var tournament = await _context.Tournaments.AsNoTracking().FirstOrDefaultAsync(t => t.TournamentId == ticket.TournamentId);
-                if (tournament != null && tournament.EndDate.HasValue && ticket.PurchaseDate.Value.Date > tournament.EndDate.Value.Date)
-                {
-                    ModelState.AddModelError("PurchaseDate", "Purchase date cannot be later than the event's end date.");
-                }
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
+                    if (ticket.PurchaseDate.HasValue)
+                    {
+                        ticket.PurchaseDate = DateTime.SpecifyKind(ticket.PurchaseDate.Value, DateTimeKind.Utc);
+                    }
+
                     _context.Update(ticket);
                     await _context.SaveChangesAsync();
                 }
@@ -149,7 +118,6 @@ namespace MCT.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Status"] = new SelectList(_context.TicketStatuses, "StatusName", "StatusName", ticket.Status);
             ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "Description", ticket.TournamentId);
             ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username", ticket.UserId);
             return View(ticket);
@@ -160,7 +128,6 @@ namespace MCT.Controllers
             if (id == null) return NotFound();
 
             var ticket = await _context.Tickets
-                .Include(t => t.StatusNavigation)
                 .Include(t => t.Tournament)
                 .Include(t => t.User)
                 .FirstOrDefaultAsync(m => m.TicketId == id);
@@ -175,7 +142,10 @@ namespace MCT.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var ticket = await _context.Tickets.FindAsync(id);
-            if (ticket != null) _context.Tickets.Remove(ticket);
+            if (ticket != null)
+            {
+                _context.Tickets.Remove(ticket);
+            }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -184,6 +154,25 @@ namespace MCT.Controllers
         private bool TicketExists(int id)
         {
             return _context.Tickets.Any(e => e.TicketId == id);
+        }
+
+        private string GenerateUniqueQrCode()
+        {
+            var random = new Random();
+            string newQrCode;
+            bool exists;
+            do
+            {
+                char[] digits = new char[16];
+                for (int i = 0; i < 16; i++)
+                {
+                    digits[i] = (char)('0' + random.Next(0, 10));
+                }
+                newQrCode = new string(digits);
+                exists = _context.Tickets.Any(t => t.QrCode == newQrCode);
+            } while (exists);
+
+            return newQrCode;
         }
     }
 }

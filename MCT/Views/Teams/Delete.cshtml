@@ -1,34 +1,36 @@
 ﻿@model MCT.Models.Team
-
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "DELETE TEAM";
 }
 
-<h1>Delete</h1>
-
-@if (ViewBag.ErrorMessage != null)
-{
-    <h4 class="text-danger"><strong>@ViewBag.ErrorMessage</strong></h4>
-}
-
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Team</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Name)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(model => model.Name)</dd>
-        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.ShortCode)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(model => model.ShortCode)</dd>
-        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Region)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(model => model.Region)</dd>
-        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.MemberCount)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(model => model.MemberCount)</dd>
-    </dl>
+<div class="page-container mx-auto" style="max-width: 600px;">
+    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">DELETE TEAM CONFIRMATION</h3>
     
+    <div class="alert alert-danger bg-dark border-danger text-white mb-4 fs-6 fw-bold">
+        Are you sure you want to delete this team?
+    </div>
+
+    <div class="p-4 mb-4" style="background-color: #111111; border-radius: 8px; border-left: 4px solid #ff4655;">
+        <label class="form-label text-muted d-block mb-1">TEAM NAME</label>
+        <h3 class="text-white fw-bold mb-3">@Model.Name</h3>
+        
+        <div class="row">
+            <div class="col-6">
+                <label class="form-label text-muted d-block mb-1">SHORT CODE</label>
+                <p class="text-val-orange fs-5 fw-bold mb-0">@Model.ShortCode</p>
+            </div>
+            <div class="col-6">
+                <label class="form-label text-muted d-block mb-1">REGION</label>
+                <p class="text-white fs-5 mb-0">@Model.Region</p>
+            </div>
+        </div>
+    </div>
+
     <form asp-action="Delete">
         <input type="hidden" asp-for="TeamId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <div class="d-flex justify-content-end gap-3 pt-2">
+            <a asp-action="Index" class="btn-outline-val">CANCEL</a>
+            <button type="submit" class="btn btn-danger-val">PERMANENTLY DELETE</button>
+        </div>
     </form>
 </div>

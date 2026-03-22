@@ -1,11 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700&display=swap');
 
-
 body {
     background-color: #0f1923 !important;
     color: #ece8e1 !important;
     font-family: 'Montserrat', sans-serif !important;
-    overflow: hidden !important; 
+    overflow: hidden !important;
 }
 
 h1, h2, h3, h4, h5, .nav-link, .navbar-brand {
@@ -37,13 +36,16 @@ h1, h2, h3, h4, h5, .nav-link, .navbar-brand {
     font-size: 2rem;
 }
 
-
 .text-val-red {
     color: #ff4655 !important;
 }
 
 .text-val-orange {
     color: #FF9C08 !important;
+}
+
+.text-muted {
+    color: #a9b4af !important;
 }
 
 .hover-val-red {
@@ -54,8 +56,7 @@ h1, h2, h3, h4, h5, .nav-link, .navbar-brand {
         color: #ff4655 !important;
     }
 
-
-.val-card, .val-card-leaderboard, .val-card-chart {
+.val-card, .val-card-leaderboard, .val-card-chart, .page-container {
     background-color: #1f2326;
     border: 1px solid #333;
     border-radius: 8px;
@@ -63,6 +64,8 @@ h1, h2, h3, h4, h5, .nav-link, .navbar-brand {
 
 .val-card {
     transition: all 0.2s ease;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
 }
 
     .val-card:hover {
@@ -75,18 +78,19 @@ h1, h2, h3, h4, h5, .nav-link, .navbar-brand {
     box-shadow: 0 0 15px rgba(255, 70, 85, 0.3) !important;
 }
 
-
 .btn-outline-val {
     background-color: transparent;
     color: #FF9C08;
     border: 1px solid #FF9C08;
     border-radius: 4px;
-    padding: 6px 15px;
+    padding: 8px 25px;
     text-decoration: none;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1.2rem;
     transition: 0.2s;
     display: inline-block;
+    cursor: pointer;
+    text-align: center;
 }
 
     .btn-outline-val:hover {
@@ -101,39 +105,88 @@ h1, h2, h3, h4, h5, .nav-link, .navbar-brand {
     border-radius: 4px;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1.2rem;
-    padding: 6px 20px;
+    padding: 8px 25px;
     transition: 0.2s;
+    display: inline-block;
+    cursor: pointer;
+    text-align: center;
 }
 
     .btn-primary:hover {
         background-color: #e03e4d;
     }
 
+.btn-danger-val {
+    background-color: #8b0000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    padding: 8px 25px;
+    transition: 0.2s;
+    display: inline-block;
+    cursor: pointer;
+    text-align: center;
+}
+
+    .btn-danger-val:hover {
+        background-color: #ff4655;
+    }
 
 .table {
     background-color: transparent !important;
     color: #ece8e1 !important;
+    width: 100%;
+    margin-bottom: 0;
 }
 
     .table td, .table th {
         background-color: transparent !important;
         color: #ece8e1 !important;
         border-bottom: 1px solid #333;
+        padding: 1rem 0.5rem;
     }
 
 .page-container {
-    background-color: #1f2326;
-    border: 1px solid #333;
-    border-radius: 8px;
-    padding: 25px;
+    padding: 30px;
     margin-top: 20px;
+    margin-bottom: 30px;
 }
 
-.form-control, .form-select {
+.form-control {
+    display: block;
+    width: 100%;
     background-color: #111111;
     border: 1px solid #333;
     color: #ece8e1;
     border-radius: 4px;
+    padding: 12px 15px;
+    font-size: 1rem;
+    height: 50px;
+    outline: none;
+    box-shadow: none;
+}
+
+.form-select {
+    display: block;
+    width: 100%;
+    background-color: #111111;
+    border: 1px solid #333;
+    color: #ece8e1;
+    border-radius: 4px;
+    padding: 12px 40px 12px 15px;
+    font-size: 1rem;
+    height: 50px;
+    outline: none;
+    box-shadow: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a9b4af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px 12px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
     .form-control:focus, .form-select:focus {
@@ -141,8 +194,23 @@ h1, h2, h3, h4, h5, .nav-link, .navbar-brand {
         color: #ece8e1;
         border-color: #FF9C08;
         box-shadow: none;
+        outline: none;
     }
 
+    .form-select option {
+        background-color: #111111;
+        color: #ece8e1;
+        padding: 10px;
+    }
+
+.form-label {
+    color: #fff;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
 
 ::-webkit-scrollbar {
     width: 6px;
@@ -172,7 +240,7 @@ h1, h2, h3, h4, h5, .nav-link, .navbar-brand {
     display: flex;
     height: 100%;
     margin-top: 15px;
-    margin-left: 20px;
+    margin-left: 30px;
     border-left: 1px solid #555;
     border-bottom: 1px solid #555;
     position: relative;
@@ -181,7 +249,7 @@ h1, h2, h3, h4, h5, .nav-link, .navbar-brand {
 
 .y-axis {
     position: absolute;
-    left: -25px;
+    left: -35px;
     top: 0;
     height: 100%;
     display: flex;
@@ -190,6 +258,8 @@ h1, h2, h3, h4, h5, .nav-link, .navbar-brand {
     font-size: 0.75rem;
     color: #a9b4af;
     padding-bottom: 5px;
+    text-align: right;
+    width: 30px;
 }
 
 .chart-team-bars {
@@ -223,7 +293,9 @@ h1, h2, h3, h4, h5, .nav-link, .navbar-brand {
 .bar {
     width: 25px;
     border-radius: 3px 3px 0 0;
-    transition: height 0.5s ease-in-out;
+    transition: height 0.5s ease-in-out, opacity 0.2s;
+    cursor: pointer;
+    position: relative;
 }
 
     .bar.won {
@@ -234,11 +306,63 @@ h1, h2, h3, h4, h5, .nav-link, .navbar-brand {
         background-color: #6b7177;
     }
 
-.team-label {
+    .bar::after {
+        content: attr(data-rounds);
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #111;
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.1s;
+        white-space: nowrap;
+        border: 1px solid #FF9C08;
+        z-index: 10;
+    }
+
+    .bar:hover {
+        opacity: 0.8;
+    }
+
+        .bar:hover::after {
+            opacity: 1;
+            top: -35px;
+        }
+
+.team-label-link {
     position: absolute;
     bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1.1rem;
     color: #ece8e1;
     white-space: nowrap;
+    text-decoration: none;
+    transition: color 0.2s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+}
+
+    .team-label-link:hover {
+        color: #ff4655;
+    }
+
+.fw-bold {
+    font-weight: 700 !important;
+}
+
+.fs-5 {
+    font-size: 1.25rem !important;
+}
+
+.font-monospace {
+    font-family: var(--bs-font-monospace) !important;
 }

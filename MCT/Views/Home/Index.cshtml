@@ -12,7 +12,7 @@
         maxRounds = Math.Max(maxRounds, Math.Max(team.WonRounds, team.LostRounds));
     }
 
-    int chartMax = (int)(maxRounds * 1.1);
+    int chartMax = maxRounds > 0 ? (int)(maxRounds * 1.1) : 10;
 }
 
 <div class="d-flex justify-content-center align-items-center flex-column mb-4 pt-4 mt-2">
@@ -40,15 +40,15 @@
                         {
                             var team = topTeams[i];
                             
-                            double wonPercentage = chartMax > 0 ? (double)team.WonRounds / chartMax * 100 : 0;
-                            double lostPercentage = chartMax > 0 ? (double)team.LostRounds / chartMax * 100 : 0;
+                            double wonPercentage = chartMax > 0 ? Math.Min(100, (double)team.WonRounds / chartMax * 100) : 0;
+                            double lostPercentage = chartMax > 0 ? Math.Min(100, (double)team.LostRounds / chartMax * 100) : 0;
 
                             <div class="team-bar-group">
                                 <div class="bar-container">
-                                    <div class="bar won" style="height: @(wonPercentage)%;"></div>
-                                    <div class="bar lost" style="height: @(lostPercentage)%;"></div>
+                                    <div class="bar won" style="height: @(wonPercentage.ToString(System.Globalization.CultureInfo.InvariantCulture))%;" data-rounds="@team.WonRounds"></div>
+                                    <div class="bar lost" style="height: @(lostPercentage.ToString(System.Globalization.CultureInfo.InvariantCulture))%;" data-rounds="@team.LostRounds"></div>
                                 </div>
-                                <span class="team-label">@team.TeamName</span>
+                                <a asp-controller="Teams" asp-action="Details" asp-route-id="@team.TeamId" class="team-label-link">@team.ShortCode</a>
                             </div>
                         }
                         else
@@ -58,7 +58,7 @@
                                     <div class="bar won" style="height: 0%;"></div>
                                     <div class="bar lost" style="height: 0%;"></div>
                                 </div>
-                                <span class="team-label text-muted">---</span>
+                                <span class="team-label-link text-muted">---</span>
                             </div>
                         }
                     }
@@ -101,7 +101,11 @@
 
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="text-end" style="flex: 1;">
-                            <h3 class="text-white m-0">@(match.TeamA?.ShortCode ?? match.TeamA?.Name ?? "TBD")</h3>
+                            <h3 class="text-white m-0">
+                                <a asp-controller="Teams" asp-action="Details" asp-route-id="@match.TeamAId" class="text-white text-decoration-none hover-val-red">
+                                    @(match.TeamA?.ShortCode ?? match.TeamA?.Name ?? "TBD")
+                                </a>
+                            </h3>
                         </div>
                         <div class="text-center px-4" style="min-width: 150px;">
                             <h2 class="m-0" style="font-family: 'Bebas Neue', sans-serif; color: #ff4655; font-size: 3rem;">
@@ -112,10 +116,14 @@
                             </div>
                         </div>
                         <div class="text-start" style="flex: 1;">
-                            <h3 class="text-white m-0">@(match.TeamB?.ShortCode ?? match.TeamB?.Name ?? "TBD")</h3>
+                            <h3 class="text-white m-0">
+                                <a asp-controller="Teams" asp-action="Details" asp-route-id="@match.TeamBId" class="text-white text-decoration-none hover-val-red">
+                                    @(match.TeamB?.ShortCode ?? match.TeamB?.Name ?? "TBD")
+                                </a>
+                            </h3>
                         </div>
                         <div class="border-start border-secondary ps-4 ms-3">
-                            <a asp-controller="Matches" asp-action="Details" asp-route-id="@match.MatchId" class="btn-outline-val">VIEW DETAILS</a>
+                            <a asp-controller="Matches" asp-action="Details" asp-route-id="@match.MatchId" class="btn-outline-val w-100">VIEW DETAILS</a>
                         </div>
                     </div>
                 </div>
@@ -136,14 +144,17 @@
                             {
                                 int rank = i + 1;
                                 <tr class="border-bottom border-secondary" style="height: 60px;">
-                                    @if (i < topTeams.Count)
+                                    @if (i < rankingsList.Count)
                                     {
-                                        var team = topTeams[i];
+                                        var team = rankingsList[i];
+                                        string diffStr = team.Diff > 0 ? "+" + team.Diff : team.Diff.ToString();
+                                        if (diffStr.Length > 5) diffStr = diffStr.Substring(0, 4) + "..";
+
                                         <td class="text-white fw-bold fs-4" style="width: 40px;">@rank</td>
                                         <td class="fw-bold fs-4">
-                                            <a asp-controller="Teams" asp-action="Details" asp-route-id="@team.TeamId" class="text-white text-decoration-none hover-val-red">@team.TeamName</a>
+                                            <a asp-controller="Teams" asp-action="Details" asp-route-id="@team.TeamId" class="text-white text-decoration-none hover-val-red text-truncate d-block" style="max-width: 120px;">@team.ShortCode</a>
                                         </td>
-                                        <td class="text-end text-val-orange fw-bold fs-4">@(team.Diff > 0 ? "+" + team.Diff : team.Diff)</td>
+                                        <td class="text-end text-val-orange fw-bold fs-4">@diffStr</td>
                                     }
                                     else
                                     {
