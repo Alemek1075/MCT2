@@ -55,7 +55,7 @@ namespace MCT.Controllers
             {
                 var today = DateTime.UtcNow.Date;
 
-                if (tournament.Status == "Active") 
+                if (tournament.Status == "Active")
                 {
                     if (tournament.StartDate.HasValue && tournament.EndDate.HasValue)
                     {
@@ -71,10 +71,10 @@ namespace MCT.Controllers
                     }
                     else
                     {
-                        tournament.Status = "Planned"; 
+                        tournament.Status = "Planned";
                     }
                 }
-                
+
 
                 _context.Add(tournament);
                 await _context.SaveChangesAsync();
@@ -82,9 +82,9 @@ namespace MCT.Controllers
             }
 
             var statuses = new List<SelectListItem> {
-        new SelectListItem { Value = "Active", Text = "Automatic" },
-        new SelectListItem { Value = "Canceled", Text = "Canceled" }
-    };
+                new SelectListItem { Value = "Active", Text = "Automatic" },
+                new SelectListItem { Value = "Canceled", Text = "Canceled" }
+            };
             ViewData["Status"] = new SelectList(statuses, "Value", "Text", tournament.Status);
             return View(tournament);
         }
@@ -97,9 +97,9 @@ namespace MCT.Controllers
             if (tournament == null) return NotFound();
 
             var statuses = new List<SelectListItem> {
-        new SelectListItem { Value = "Active", Text = "Automatic" },
-        new SelectListItem { Value = "Canceled", Text = "Canceled" }
-    };
+                new SelectListItem { Value = "Active", Text = "Automatic" },
+                new SelectListItem { Value = "Canceled", Text = "Canceled" }
+            };
 
             var currentStatus = tournament.Status == "Canceled" ? "Canceled" : "Active";
             ViewData["Status"] = new SelectList(statuses, "Value", "Text", currentStatus);
@@ -152,9 +152,9 @@ namespace MCT.Controllers
             }
 
             var statuses = new List<SelectListItem> {
-        new SelectListItem { Value = "Active", Text = "Automatic" },
-        new SelectListItem { Value = "Canceled", Text = "Canceled" }
-    };
+                new SelectListItem { Value = "Active", Text = "Automatic" },
+                new SelectListItem { Value = "Canceled", Text = "Canceled" }
+            };
             ViewData["Status"] = new SelectList(statuses, "Value", "Text", tournament.Status);
             return View(tournament);
         }

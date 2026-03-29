@@ -10,6 +10,8 @@ namespace MCT.Models
         public int Diff { get; set; }
         public int WonRounds { get; set; }
         public int LostRounds { get; set; }
+        public double WinPercentage { get; set; }
+        public int MatchesPlayed { get; set; }
         public List<Match>? MatchTeamAs { get; set; }
         public List<Match>? MatchTeamBs { get; set; }
     }

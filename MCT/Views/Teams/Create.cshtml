@@ -12,21 +12,19 @@
         <div class="mb-3">
             <label asp-for="Name" class="form-label">TEAM NAME</label>
             <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
             <label asp-for="ShortCode" class="form-label">TAG (SHORT CODE)</label>
             <input asp-for="ShortCode" class="form-control" />
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="Region" class="form-label">REGION</label>
-            <input asp-for="Region" class="form-control" />
+            <span asp-validation-for="ShortCode" class="text-danger"></span>
         </div>
 
         <div class="mb-4">
-            <label asp-for="MemberCount" class="form-label">MEMBERS</label>
-            <input asp-for="MemberCount" class="form-control" type="number" />
+            <label asp-for="Region" class="form-label">REGION</label>
+            <input asp-for="Region" class="form-control" />
+            <span asp-validation-for="Region" class="text-danger"></span>
         </div>
 
         <div class="d-flex justify-content-between pt-3">

@@ -31,19 +31,29 @@ namespace MCT.Controllers
                 .Include(t => t.MatchTeamBs)
                 .ToListAsync();
 
-            var rankings = teams.Select(t => new LeaderboardViewModel
-            {
-                TeamId = t.TeamId,
-                TeamName = t.ShortCode ?? t.Name ?? "TBD",
-                ShortCode = t.ShortCode ?? "TBD",
-                WonRounds = t.MatchTeamAs.Sum(m => m.ScoreA ?? 0) + t.MatchTeamBs.Sum(m => m.ScoreB ?? 0),
-                LostRounds = t.MatchTeamAs.Sum(m => m.ScoreB ?? 0) + t.MatchTeamBs.Sum(m => m.ScoreA ?? 0),
-                Diff = (t.MatchTeamAs.Sum(m => m.ScoreA ?? 0) + t.MatchTeamBs.Sum(m => m.ScoreB ?? 0)) -
-                       (t.MatchTeamAs.Sum(m => m.ScoreB ?? 0) + t.MatchTeamBs.Sum(m => m.ScoreA ?? 0)),
-                MatchTeamAs = t.MatchTeamAs.ToList(),
-                MatchTeamBs = t.MatchTeamBs.ToList()
+            var rankings = teams.Select(t => {
+                int won = t.MatchTeamAs.Sum(m => m.ScoreA ?? 0) + t.MatchTeamBs.Sum(m => m.ScoreB ?? 0);
+                int lost = t.MatchTeamAs.Sum(m => m.ScoreB ?? 0) + t.MatchTeamBs.Sum(m => m.ScoreA ?? 0);
+                int total = won + lost;
+                int matchesPlayed = t.MatchTeamAs.Count + t.MatchTeamBs.Count;
+
+                return new LeaderboardViewModel
+                {
+                    TeamId = t.TeamId,
+                    TeamName = t.ShortCode ?? t.Name ?? "TBD",
+                    ShortCode = t.ShortCode ?? "TBD",
+                    WonRounds = won,
+                    LostRounds = lost,
+                    Diff = won - lost,
+                    WinPercentage = total > 0 ? (double)won / total * 100 : 0,
+                    MatchesPlayed = matchesPlayed,
+                    MatchTeamAs = t.MatchTeamAs.ToList(),
+                    MatchTeamBs = t.MatchTeamBs.ToList()
+                };
             })
-            .OrderByDescending(x => x.Diff)
+            .Where(x => x.MatchesPlayed >= 3)
+            .OrderByDescending(x => x.WinPercentage)
+            .ThenByDescending(x => x.Diff)
             .ToList();
 
             ViewBag.Rankings = rankings;

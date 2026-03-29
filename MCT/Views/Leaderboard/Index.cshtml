@@ -14,6 +14,7 @@
                 <th class="text-white text-center pb-3" style="width: 80px;">RANK</th>
                 <th class="text-white pb-3">TEAM</th>
                 <th class="text-white pb-3">TAG</th>
+                <th class="text-center text-white pb-3">WIN %</th>
                 <th class="text-end text-white pb-3">ROUND DIFF</th>
             </tr>
         </thead>
@@ -31,6 +32,7 @@
                         </a>
                     </td>
                     <td><span class="badge bg-dark border border-secondary fs-6 text-white">@team.ShortCode</span></td>
+                    <td class="text-center text-val-red fw-bold fs-4">@team.WinPercentage.ToString("0.0")%</td>
                     <td class="text-end text-val-orange fw-bold fs-4">@(team.Diff > 0 ? "+" + team.Diff : team.Diff)</td>
                 </tr>
                 rank++;

@@ -44,10 +44,11 @@ namespace MCT.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TeamId,Name,ShortCode,Region,MemberCount")] Team team)
+        public async Task<IActionResult> Create([Bind("TeamId,Name,ShortCode,Region")] Team team)
         {
             if (ModelState.IsValid)
             {
+                team.MemberCount = 0;
                 _context.Add(team);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -66,7 +67,7 @@ namespace MCT.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("TeamId,Name,ShortCode,Region,MemberCount")] Team team)
+        public async Task<IActionResult> Edit(int id, [Bind("TeamId,Name,ShortCode,Region")] Team team)
         {
             if (id != team.TeamId) return NotFound();
 
@@ -74,7 +75,18 @@ namespace MCT.Controllers
             {
                 try
                 {
-                    _context.Update(team);
+                    var existingTeam = await _context.Teams
+                        .Include(t => t.Players)
+                        .FirstOrDefaultAsync(t => t.TeamId == id);
+
+                    if (existingTeam == null) return NotFound();
+
+                    existingTeam.Name = team.Name;
+                    existingTeam.ShortCode = team.ShortCode;
+                    existingTeam.Region = team.Region;
+                    existingTeam.MemberCount = existingTeam.Players.Count;
+
+                    _context.Update(existingTeam);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
