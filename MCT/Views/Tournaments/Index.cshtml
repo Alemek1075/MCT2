@@ -1,59 +1,62 @@
 ﻿@model IEnumerable<MCT.Models.Tournament>
-
 @{
-    ViewData["Title"] = "Tournaments";
+    ViewData["Title"] = "EVENTS";
 }
 
-<h1>Tournaments</h1>
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create Tournament</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Location</th>
-            <th>Prize Pool</th>
-            <th>Places</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Status</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Description</td>
-                <td>@item.Location</td>
-                <td>@item.Price</td>
-                <td>@item.Places</td>
-                <td>@(item.StartDate?.ToShortDateString() ?? "-")</td>
-                <td>@(item.EndDate?.ToShortDateString() ?? "-")</td>
-                <td>
-                    @if (item.CurrentStatus == "Planned")
-                    {
-                        <span class="badge bg-secondary">Planned</span>
-                    }
-                    else if (item.CurrentStatus == "Ongoing")
-                    {
+<div class="page-container mx-auto" style="max-width: 1200px;">
+    <div class="d-flex justify-content-between align-items-end border-bottom border-secondary mb-4 pb-2">
+        <h3 class="text-val-red m-0">EVENTS MANAGEMENT</h3>
+        <a asp-action="Create" class="btn btn-primary">CREATE EVENT</a>
+    </div>
 
-                        <span class="badge bg-success">Ongoing</span>
-                    }
-                    else
-                    {
+    <div class="val-card p-4">
+        <table class="table table-dark table-borderless align-middle mb-0">
+            <thead class="border-bottom border-secondary text-muted">
+                <tr>
+                    <th class="fw-normal" style="letter-spacing: 1px;">NAME</th>
+                    <th class="fw-normal" style="letter-spacing: 1px;">LOCATION</th>
+                    <th class="fw-normal text-end" style="letter-spacing: 1px;">PRIZE</th>
+                    <th class="fw-normal text-center" style="letter-spacing: 1px;">DATES</th>
+                    <th class="fw-normal text-center" style="letter-spacing: 1px;">STATUS</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="border-bottom border-secondary" style="height: 60px;">
+                        <td class="text-white fw-bold fs-5">@item.Description</td>
+                        <td>@item.Location</td>
+                        <td class="text-end text-val-orange fw-bold font-monospace">$@(Math.Floor(item.Price ?? 0))</td>
+                        <td class="text-center text-nowrap">@(item.StartDate?.ToString("MM/dd/yyyy")) - @(item.EndDate?.ToString("MM/dd/yyyy"))</td>
+                        <td class="text-center">
+                            @if (item.CurrentStatus == "Planned")
+                            {
+                                <span class="badge bg-secondary">PLANNED</span>
+                            }
+                            else if (item.CurrentStatus == "Ongoing")
+                            {
 
-                        <span class="badge bg-primary">Completed</span>
-                    }
-                </td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.TournamentId" class="btn btn-sm btn-info">Details</a>
-                    <form asp-action="Delete" asp-route-id="@item.TournamentId" method="post" class="d-inline" onsubmit="return confirm('УВАГА: Видалення турніру також видалить ВСІ пов\'язані з ним матчі! Ви дійсно хочете продовжити?');">
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                                <span class="badge bg-success">ONGOING</span>
+                            }
+                            else
+                            {
+
+                                <span class="badge bg-primary">COMPLETED</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-2 align-items-center">
+                                <a asp-action="Details" asp-route-id="@item.TournamentId" class="btn btn-outline-val btn-action-sm">DETAILS</a>
+                                <a asp-action="Edit" asp-route-id="@item.TournamentId" class="btn btn-primary btn-action-sm">EDIT</a>
+                                <form asp-action="Delete" asp-route-id="@item.TournamentId" method="post" class="m-0 p-0 d-inline-flex">
+                                    <button type="submit" class="btn btn-danger-val btn-action-sm" onclick="return confirm('Delete this event? All matches will be deleted.');">DELETE</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

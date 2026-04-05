@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MCT.Models;
 
@@ -60,18 +61,26 @@ namespace MCT.Controllers
                 ModelState.AddModelError("SelectedTeamIds", "The number of participating teams must be exactly 2, 4, or 8.");
             }
 
+            int durationDays = teamCount > 0 ? (int)Math.Log2(teamCount) : 0;
+            DateTime calculatedEndDate = tournament.StartDate.Value.AddDays(durationDays);
+
+            bool isOverlap = await _context.Tournaments.AnyAsync(t =>
+                t.StartDate.HasValue && t.EndDate.HasValue &&
+                tournament.StartDate.Value.Date <= t.EndDate.Value.Date &&
+                calculatedEndDate.Date >= t.StartDate.Value.Date);
+
+            if (isOverlap)
+            {
+                ModelState.AddModelError("StartDate", "Dates overlap with an existing tournament! Choose another date.");
+            }
+
             if (!ModelState.IsValid)
             {
                 ViewBag.Teams = await _context.Teams.ToListAsync();
                 return View(tournament);
             }
 
-            int durationDays = (int)Math.Log2(teamCount);
-            if (tournament.StartDate.HasValue)
-            {
-                tournament.EndDate = tournament.StartDate.Value.AddDays(durationDays);
-            }
-
+            tournament.EndDate = calculatedEndDate;
             tournament.Status = tournament.CurrentStatus;
 
             _context.Tournaments.Add(tournament);
@@ -88,7 +97,6 @@ namespace MCT.Controllers
 
             var rng = new Random();
             var shuffledTeams = tournament.SelectedTeamIds.OrderBy(x => rng.Next()).ToList();
-
             DateTime currentMatchTime = tournament.StartDate.Value.Date.AddHours(10);
 
             for (int i = 0; i < shuffledTeams.Count; i += 2)
@@ -103,7 +111,6 @@ namespace MCT.Controllers
                     ScheduledAt = currentMatchTime,
                     MatchType = "Auto"
                 });
-
                 currentMatchTime = currentMatchTime.AddHours(2);
             }
 
@@ -111,26 +118,112 @@ namespace MCT.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var tournament = await _context.Tournaments.FindAsync(id);
+            if (tournament == null) return NotFound();
+
+            ViewBag.Status = new SelectList(await _context.TournamentStatuses.ToListAsync(), "StatusName", "StatusName", tournament.Status);
+            return View(tournament);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Tournament tournament)
+        {
+            if (id != tournament.TournamentId) return NotFound();
+
+            ModelState.Remove("EndDate");
+
+            var existingTournament = await _context.Tournaments
+                .Include(t => t.Matches)
+                .FirstOrDefaultAsync(t => t.TournamentId == id);
+
+            if (existingTournament == null) return NotFound();
+
+            if (existingTournament.StartDate?.Date != tournament.StartDate?.Date)
+            {
+                bool hasScores = existingTournament.Matches.Any(m => m.ScoreA > 0 || m.ScoreB > 0);
+
+                if (hasScores)
+                {
+                    ModelState.AddModelError("StartDate", "Cannot change Start Date because some matches already have scores recorded.");
+                }
+                else
+                {
+                    var timeShift = tournament.StartDate.Value - existingTournament.StartDate.Value;
+                    DateTime newEndDate = existingTournament.EndDate.Value.Add(timeShift);
+
+                    bool isOverlap = await _context.Tournaments.AnyAsync(t =>
+                        t.TournamentId != existingTournament.TournamentId &&
+                        t.StartDate.HasValue && t.EndDate.HasValue &&
+                        tournament.StartDate.Value.Date <= t.EndDate.Value.Date &&
+                        newEndDate.Date >= t.StartDate.Value.Date);
+
+                    if (isOverlap)
+                    {
+                        ModelState.AddModelError("StartDate", "New dates overlap with another existing tournament.");
+                    }
+                    else
+                    {
+                        // Зміщуємо всі дати матчів
+                        foreach (var match in existingTournament.Matches)
+                        {
+                            if (match.ScheduledAt.HasValue)
+                            {
+                                match.ScheduledAt = match.ScheduledAt.Value.Add(timeShift);
+                            }
+                        }
+                        existingTournament.EndDate = newEndDate;
+                    }
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Status = new SelectList(await _context.TournamentStatuses.ToListAsync(), "StatusName", "StatusName", tournament.Status);
+                return View(tournament);
+            }
+
+            existingTournament.Description = tournament.Description;
+            existingTournament.Location = tournament.Location;
+            existingTournament.Price = tournament.Price;
+            existingTournament.Status = tournament.Status;
+            existingTournament.Places = tournament.Places;
+            if (tournament.StartDate.HasValue)
+            {
+                existingTournament.StartDate = tournament.StartDate;
+            }
+
+            try
+            {
+                _context.Update(existingTournament);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException) { throw; }
+
+            return RedirectToAction(nameof(Index));
+        }
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var tournament = await _context.Tournaments
-                .Include(t => t.Matches)
-                .Include(t => t.TournamentTeams)
-                .Include(t => t.Tickets)
-                .FirstOrDefaultAsync(m => m.TournamentId == id);
-
-            if (tournament != null)
+            var team = await _context.Teams.FindAsync(id);
+            if (team != null)
             {
-                _context.Matches.RemoveRange(tournament.Matches);
-                _context.TournamentTeams.RemoveRange(tournament.TournamentTeams);
-                _context.Tickets.RemoveRange(tournament.Tickets);
+                bool isInTournament = await _context.TournamentTeams.AnyAsync(tt => tt.TeamId == id);
+                if (isInTournament)
+                {
+                    TempData["ErrorMessage"] = $"Cannot delete team '{team.Name}' because it is currently participating in an event.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-                _context.Tournaments.Remove(tournament);
+                _context.Teams.Remove(team);
                 await _context.SaveChangesAsync();
             }
-
             return RedirectToAction(nameof(Index));
         }
     }

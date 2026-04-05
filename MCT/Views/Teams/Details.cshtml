@@ -1,29 +1,30 @@
 ﻿@model MCT.Models.Team
-
 @{
-    ViewData["Title"] = "Team Details";
+    ViewData["Title"] = "TEAM DETAILS";
 }
 
-<h1>Details</h1>
+<div class="page-container mx-auto" style="max-width: 600px;">
+    <div class="d-flex justify-content-between align-items-end border-bottom border-secondary mb-4 pb-2">
+        <h3 class="text-val-red m-0">TEAM DETAILS</h3>
+        <div class="d-flex gap-2 align-items-center">
+            <a asp-action="Edit" asp-route-id="@Model?.TeamId" class="btn btn-primary btn-action-sm">EDIT TEAM</a>
+            <a asp-action="Index" class="btn btn-outline-val btn-action-sm">BACK</a>
+        </div>
+    </div>
 
-<div>
-    <h4>Team</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">Name</dt>
-        <dd class="col-sm-10">@Model.Name</dd>
+    <div class="val-card p-5 text-center">
+        <h1 class="text-white mb-2" style="font-size: 3.5rem;">@Model.Name</h1>
+        <h3 class="text-val-orange mb-4 font-monospace">[@Model.ShortCode]</h3>
         
-        <dt class="col-sm-2">Short Code</dt>
-        <dd class="col-sm-10">@Model.ShortCode</dd>
-        
-        <dt class="col-sm-2">Region</dt>
-        <dd class="col-sm-10">@Model.Region</dd>
-
-        <dt class="col-sm-2">Players Count</dt>
-        <dd class="col-sm-10">@Model.ActualMemberCount</dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.TeamId" class="btn btn-primary">Edit</a>
-    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        <div class="row border-top border-secondary pt-4 mt-2">
+            <div class="col-6 border-end border-secondary">
+                <p class="text-muted mb-1 form-label">REGION</p>
+                <h4 class="text-white">@Model.Region</h4>
+            </div>
+            <div class="col-6">
+                <p class="text-muted mb-1 form-label">ACTIVE PLAYERS</p>
+                <h4 class="text-white font-monospace">@Model.ActualMemberCount</h4>
+            </div>
+        </div>
+    </div>
 </div>

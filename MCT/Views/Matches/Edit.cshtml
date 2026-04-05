@@ -1,31 +1,36 @@
 ﻿@model MCT.Models.Match
-
 @{
-    ViewData["Title"] = "Enter Match Score";
+    ViewData["Title"] = "ENTER SCORE";
 }
 
-<h1>Enter Score</h1>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="MatchId" />
+<div class="page-container mx-auto" style="max-width: 550px;">
+    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">ENTER MATCH SCORE</h3>
 
-            <div class="form-group mb-3">
-                <label class="control-label fw-bold">@Model.TeamA?.Name Score</label>
-                <input asp-for="ScoreA" type="number" min="0" class="form-control" required />
-            </div>
+    <form asp-action="Edit">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <input type="hidden" asp-for="MatchId" />
 
-            <div class="form-group mb-3">
-                <label class="control-label fw-bold">@Model.TeamB?.Name Score</label>
-                <input asp-for="ScoreB" type="number" min="0" class="form-control" required />
+        <div class="p-4 mb-4 val-card" style="background-color: #111111;">
+            <p class="text-center text-muted mb-4 form-label">@(Model.Tournament?.Description ?? "EVENT MATCH")</p>
+            
+            <div class="row align-items-center text-center">
+                <div class="col-5">
+                    <label class="form-label text-white fs-5">@(Model.TeamA?.ShortCode ?? Model.TeamA?.Name ?? "TBD")</label>
+                    <input asp-for="ScoreA" type="number" min="0" class="form-control text-center fs-3 text-val-orange font-monospace mt-2" required />
+                </div>
+                <div class="col-2 d-flex justify-content-center align-items-center mt-4">
+                    <span class="text-muted fs-4 fw-bold">-</span>
+                </div>
+                <div class="col-5">
+                    <label class="form-label text-white fs-5">@(Model.TeamB?.ShortCode ?? Model.TeamB?.Name ?? "TBD")</label>
+                    <input asp-for="ScoreB" type="number" min="0" class="form-control text-center fs-3 text-val-orange font-monospace mt-2" required />
+                </div>
             </div>
+        </div>
 
-            <div class="form-group">
-                <input type="submit" value="Save Score" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-            </div>
-        </form>
-    </div>
+        <div class="d-flex justify-content-end gap-3 pt-3 border-top border-secondary">
+            <a asp-action="Index" class="btn-outline-val">CANCEL</a>
+            <button type="submit" class="btn btn-primary">SAVE SCORE</button>
+        </div>
+    </form>
 </div>

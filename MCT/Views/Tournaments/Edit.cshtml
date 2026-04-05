@@ -22,34 +22,29 @@
             <span asp-validation-for="Location" class="text-danger"></span>
         </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label asp-for="StartDate" class="form-label">START DATE</label>
-                <input asp-for="StartDate" class="form-control" type="date" />
-                <span asp-validation-for="StartDate" class="text-danger"></span>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label asp-for="EndDate" class="form-label">END DATE</label>
-                <input asp-for="EndDate" class="form-control" type="date" />
-                <span asp-validation-for="EndDate" class="text-danger"></span>
-            </div>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">PRIZE POOL</label>
-            <div class="input-group">
-                <span class="input-group-text bg-dark border-secondary text-val-orange">$</span>
-                <input name="Price" id="Price" class="form-control" type="number" step="1" min="0" value="@(Model?.Price != null ? Math.Floor(Model.Price.Value).ToString("0") : "")" onkeydown="return event.key !== '.' && event.key !== ','" required />
-            </div>
-        </div>
-
         <div class="mb-4">
-            <label asp-for="Status" class="form-label">STATUS LOGIC</label>
-            <select asp-for="Status" class="form-select" asp-items="ViewBag.Status"></select>
-            <span asp-validation-for="Status" class="text-danger"></span>
+            <label asp-for="StartDate" class="form-label">START DATE</label>
+            <input asp-for="StartDate" class="form-control" type="date" />
+            <span class="text-muted" style="font-size: 0.75rem;">Can only be changed if no matches have scores. The end date will shift automatically.</span>
+            <span asp-validation-for="StartDate" class="text-danger d-block mt-1"></span>
         </div>
 
-        <div class="d-flex justify-content-end gap-3 pt-3">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label class="form-label">PRIZE POOL</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-val-orange">$</span>
+                    <input name="Price" id="Price" class="form-control" type="number" step="1" min="0" value="@(Model?.Price != null ? Math.Floor(Model.Price.Value).ToString("0") : "")" onkeydown="return event.key !== '.' && event.key !== ','" required />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Places" class="form-label">SPECTATOR SEATS</label>
+                <input asp-for="Places" type="number" min="0" class="form-control" required />
+                <span asp-validation-for="Places" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-3 pt-3 border-top border-secondary">
             <a asp-action="Index" class="btn-outline-val">CANCEL</a>
             <button type="submit" class="btn btn-primary">SAVE CHANGES</button>
         </div>

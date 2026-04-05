@@ -3,44 +3,88 @@
     ViewData["Title"] = "EVENT DETAILS";
 }
 
-<div class="page-container mx-auto" style="max-width: 800px;">
-    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">EVENT DETAILS</h3>
-
-    <div class="p-4 mb-4" style="background-color: #111111; border-radius: 8px;">
-        <div class="row mb-4">
-            <div class="col-6 border-end border-secondary">
-                <label class="form-label text-muted d-block mb-1">EVENT NAME</label>
-                <span class="text-white fs-4 fw-bold">@Model.Description</span>
-            </div>
-            <div class="col-6 ps-4">
-                <label class="form-label text-muted d-block mb-1">LOCATION</label>
-                <span class="text-white fs-5">@Model.Location</span>
-            </div>
-        </div>
-
-        <div class="row mb-4">
-            <div class="col-6 border-end border-secondary">
-                <label class="form-label text-muted d-block mb-1">DATES</label>
-                <span class="text-white fs-5">@(Model.StartDate?.ToString("MM/dd/yyyy") ?? "TBD") - @(Model.EndDate?.ToString("MM/dd/yyyy") ?? "TBD")</span>
-            </div>
-            <div class="col-6 ps-4">
-                <label class="form-label text-muted d-block mb-1">STATUS</label>
-                <span class="badge bg-dark border border-secondary text-white fs-6">@Model.Status</span>
-            </div>
-        </div>
-
-        <div class="text-center pt-3 border-top border-secondary">
-            <label class="form-label text-muted d-block mb-1">PRIZE POOL</label>
-            <span class="text-val-orange fs-3 fw-bold font-monospace">$@(Math.Floor(Model.Price ?? 0))</span>
+<div class="page-container mx-auto" style="max-width: 1300px;">
+    <div class="d-flex justify-content-between align-items-end border-bottom border-secondary mb-4 pb-2">
+        <h3 class="text-val-red m-0">EVENT DETAILS</h3>
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model?.TournamentId" class="btn btn-primary btn-sm" style="padding: 4px 15px; font-size: 1rem;">EDIT EVENT</a>
+            <a asp-action="Index" class="btn-outline-val btn-sm" style="padding: 4px 15px; font-size: 1rem;">BACK</a>
         </div>
     </div>
 
-    <div class="row pt-2">
-        <div class="col-6">
-            <a asp-action="Edit" asp-route-id="@Model?.TournamentId" class="btn btn-primary w-100">EDIT EVENT</a>
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <div class="p-4 h-100" style="background-color: #111111; border-radius: 8px; border: 1px solid #333;">
+                <h4 class="text-white mb-4" style="font-family: 'Bebas Neue', sans-serif;">INFO</h4>
+                
+                <label class="form-label text-muted d-block mb-1">EVENT NAME</label>
+                <span class="text-white fs-5 fw-bold d-block mb-3">@Model.Description</span>
+                
+                <label class="form-label text-muted d-block mb-1">LOCATION</label>
+                <span class="text-white d-block mb-3">@Model.Location</span>
+                
+                <label class="form-label text-muted d-block mb-1">DATES</label>
+                <span class="text-white d-block mb-3">@(Model.StartDate?.ToString("MM/dd/yyyy") ?? "TBD") - @(Model.EndDate?.ToString("MM/dd/yyyy") ?? "TBD")</span>
+                
+                <label class="form-label text-muted d-block mb-1">STATUS</label>
+                <span class="badge bg-dark border border-secondary text-white fs-6 d-inline-block mb-3">@Model.Status</span>
+                
+                <label class="form-label text-muted d-block mb-1">PRIZE POOL</label>
+                <span class="text-val-orange fs-3 fw-bold font-monospace d-block">$@(Math.Floor(Model.Price ?? 0))</span>
+            </div>
         </div>
-        <div class="col-6">
-            <a asp-action="Index" class="btn-outline-val w-100">BACK TO LIST</a>
+
+        <div class="col-lg-9 mb-4">
+            <div class="p-4 h-100 overflow-auto" style="background-color: #111111; border-radius: 8px; border: 1px solid #333;">
+                <h4 class="text-white mb-4 text-center" style="font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px;">TOURNAMENT BRACKET</h4>
+                
+                <div class="bracket-container d-flex justify-content-center pt-3" style="min-height: 500px;">
+                    @{
+                        if (Model.Matches != null && Model.Matches.Any())
+                        {
+                            var rounds = Model.Matches.GroupBy(m => m.ScheduledAt?.Date).OrderBy(g => g.Key).ToList();
+                            int roundNum = 1;
+                            
+                            foreach (var round in rounds)
+                            {
+                                <div class="bracket-round d-flex flex-column justify-content-around" style="width: 250px;">
+                                    <h5 class="text-muted text-center mb-2 position-absolute w-100" style="top: -30px; font-family: 'Bebas Neue', sans-serif;">ROUND @roundNum</h5>
+                                    
+                                    @foreach (var match in round.OrderBy(m => m.ScheduledAt))
+                                    {
+                                        bool isTbdA = match.TeamA == null;
+                                        bool isTbdB = match.TeamB == null;
+                                        bool teamAWon = match.WinnerId != null && match.WinnerId == match.TeamAId;
+                                        bool teamBWon = match.WinnerId != null && match.WinnerId == match.TeamBId;
+
+                                        <div class="bracket-match val-card p-0 m-0">
+                                            <div class="d-flex justify-content-between align-items-center p-2 border-bottom border-secondary @(teamAWon ? "bg-val-dark-red" : "")" style="border-radius: 8px 8px 0 0;">
+                                                <span class="text-white fw-bold text-truncate @(isTbdA ? "text-muted" : "")" style="max-width: 140px;">
+                                                    @(isTbdA ? "TBD" : (match.TeamA?.ShortCode ?? match.TeamA?.Name))
+                                                </span>
+                                                <span class="font-monospace fw-bold @(teamAWon ? "text-white" : "text-val-orange")">@(isTbdA ? "-" : (match.ScoreA?.ToString() ?? "0"))</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center p-2 @(teamBWon ? "bg-val-dark-red" : "")" style="border-radius: 0 0 8px 8px;">
+                                                <span class="text-white fw-bold text-truncate @(isTbdB ? "text-muted" : "")" style="max-width: 140px;">
+                                                    @(isTbdB ? "TBD" : (match.TeamB?.ShortCode ?? match.TeamB?.Name))
+                                                </span>
+                                                <span class="font-monospace fw-bold @(teamBWon ? "text-white" : "text-val-orange")">@(isTbdB ? "-" : (match.ScoreB?.ToString() ?? "0"))</span>
+                                            </div>
+                                            
+                                            <a asp-controller="Matches" asp-action="Details" asp-route-id="@match.MatchId" class="stretched-link" title="View Match"></a>
+                                        </div>
+                                    }
+                                </div>
+                                roundNum++;
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-muted text-center py-5 w-100">NO MATCHES GENERATED YET.</div>
+                        }
+                    }
+                </div>
+            </div>
         </div>
     </div>
 </div>
