@@ -7,16 +7,20 @@ namespace MCT.Models;
 
 public partial class Tournament : IValidatableObject
 {
+    [Column("tournament_id")]
     public int TournamentId { get; set; }
 
     [Required]
+    [Column("description")]
     public string? Description { get; set; }
 
     [Required]
+    [Column("location")]
     public string? Location { get; set; }
 
     private DateTime? _startDate;
     [Required]
+    [Column("start_date")]
     public DateTime? StartDate
     {
         get => _startDate;
@@ -24,6 +28,7 @@ public partial class Tournament : IValidatableObject
     }
 
     private DateTime? _endDate;
+    [Column("end_date")]
     public DateTime? EndDate
     {
         get => _endDate;
@@ -32,12 +37,15 @@ public partial class Tournament : IValidatableObject
 
     [Required]
     [Range(0, 1000000000)]
+    [Column("price")]
     public decimal? Price { get; set; }
 
+    [Column("status")]
     public string? Status { get; set; }
 
-    [NotMapped]
-    [Range(0, int.MaxValue, ErrorMessage = "Number of places cannot be negative.")]
+    [Required]
+    [Column("places")]
+    [Range(0, int.MaxValue)]
     public int Places { get; set; }
 
     public virtual ICollection<Match> Matches { get; set; } = new List<Match>();

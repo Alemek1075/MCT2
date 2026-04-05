@@ -14,6 +14,7 @@
             <th>Name</th>
             <th>Location</th>
             <th>Prize Pool</th>
+            <th>Places</th>
             <th>Start Date</th>
             <th>End Date</th>
             <th>Status</th>
@@ -27,6 +28,7 @@
                 <td>@item.Description</td>
                 <td>@item.Location</td>
                 <td>@item.Price</td>
+                <td>@item.Places</td>
                 <td>@(item.StartDate?.ToShortDateString() ?? "-")</td>
                 <td>@(item.EndDate?.ToShortDateString() ?? "-")</td>
                 <td>
@@ -47,6 +49,9 @@
                 </td>
                 <td>
                     <a asp-action="Details" asp-route-id="@item.TournamentId" class="btn btn-sm btn-info">Details</a>
+                    <form asp-action="Delete" asp-route-id="@item.TournamentId" method="post" class="d-inline" onsubmit="return confirm('УВАГА: Видалення турніру також видалить ВСІ пов\'язані з ним матчі! Ви дійсно хочете продовжити?');">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
                 </td>
             </tr>
         }

@@ -89,6 +89,8 @@ namespace MCT.Controllers
             var rng = new Random();
             var shuffledTeams = tournament.SelectedTeamIds.OrderBy(x => rng.Next()).ToList();
 
+            DateTime currentMatchTime = tournament.StartDate.Value.Date.AddHours(10);
+
             for (int i = 0; i < shuffledTeams.Count; i += 2)
             {
                 _context.Matches.Add(new Match
@@ -98,12 +100,37 @@ namespace MCT.Controllers
                     TeamBId = shuffledTeams[i + 1],
                     ScoreA = 0,
                     ScoreB = 0,
-                    ScheduledAt = tournament.StartDate,
+                    ScheduledAt = currentMatchTime,
                     MatchType = "Auto"
                 });
+
+                currentMatchTime = currentMatchTime.AddHours(2);
             }
 
             await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var tournament = await _context.Tournaments
+                .Include(t => t.Matches)
+                .Include(t => t.TournamentTeams)
+                .Include(t => t.Tickets)
+                .FirstOrDefaultAsync(m => m.TournamentId == id);
+
+            if (tournament != null)
+            {
+                _context.Matches.RemoveRange(tournament.Matches);
+                _context.TournamentTeams.RemoveRange(tournament.TournamentTeams);
+                _context.Tickets.RemoveRange(tournament.Tickets);
+
+                _context.Tournaments.Remove(tournament);
+                await _context.SaveChangesAsync();
+            }
+
             return RedirectToAction(nameof(Index));
         }
     }

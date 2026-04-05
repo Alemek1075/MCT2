@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -27,21 +25,17 @@ namespace MCT.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
-
             var player = await _context.Players
-                .Include(p => p.Team)
-                .Include(p => p.User)
+                .Include(p => p.Team).Include(p => p.User)
                 .FirstOrDefaultAsync(m => m.PlayerId == id);
-
             if (player == null) return NotFound();
-
             return View(player);
         }
 
         public IActionResult Create()
         {
-            ViewData["Team"] = new SelectList(_context.Teams, "TeamId", "Name");
-            ViewData["User"] = new SelectList(_context.Users.Where(u => u.Role == "Player"), "UserId", "Username");
+            ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "Name");
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username");
             return View();
         }
 
@@ -49,12 +43,9 @@ namespace MCT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("PlayerId,UserId,TeamId")] Player player)
         {
-            if (player.TeamId.HasValue)
+            if (_context.Players.Any(p => p.UserId == player.UserId))
             {
-                var team = await _context.Teams
-                    .Include(t => t.Players)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(t => t.TeamId == player.TeamId);
+                ModelState.AddModelError("UserId", "Цей користувач вже доданий як гравець в одну з команд!");
             }
 
             if (ModelState.IsValid)
@@ -63,20 +54,19 @@ namespace MCT.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Team"] = new SelectList(_context.Teams, "TeamId", "Name", player.TeamId);
-            ViewData["User"] = new SelectList(_context.Users.Where(u => u.Role == "Player"), "UserId", "Username", player.UserId);
+
+            ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "Name", player.TeamId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username", player.UserId);
             return View(player);
         }
 
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
-
             var player = await _context.Players.FindAsync(id);
             if (player == null) return NotFound();
-
-            ViewData["Team"] = new SelectList(_context.Teams, "TeamId", "Name", player.TeamId);
-            ViewData["User"] = new SelectList(_context.Users.Where(u => u.Role == "Player"), "UserId", "Username", player.UserId);
+            ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "Name", player.TeamId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username", player.UserId);
             return View(player);
         }
 
@@ -86,16 +76,6 @@ namespace MCT.Controllers
         {
             if (id != player.PlayerId) return NotFound();
 
-            if (player.TeamId.HasValue)
-            {
-                var team = await _context.Teams
-                    .Include(t => t.Players)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(t => t.TeamId == player.TeamId);
-
-                var currentPlayersCount = team?.Players.Count(p => p.PlayerId != player.PlayerId) ?? 0;
-            }
-
             if (ModelState.IsValid)
             {
                 try
@@ -103,29 +83,21 @@ namespace MCT.Controllers
                     _context.Update(player);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PlayerExists(player.PlayerId)) return NotFound();
-                    else throw;
-                }
+                catch (DbUpdateConcurrencyException) { throw; }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Team"] = new SelectList(_context.Teams, "TeamId", "Name", player.TeamId);
-            ViewData["User"] = new SelectList(_context.Users.Where(u => u.Role == "Player"), "UserId", "Username", player.UserId);
+            ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "Name", player.TeamId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username", player.UserId);
             return View(player);
         }
 
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
-
             var player = await _context.Players
-                .Include(p => p.Team)
-                .Include(p => p.User)
+                .Include(p => p.Team).Include(p => p.User)
                 .FirstOrDefaultAsync(m => m.PlayerId == id);
-
             if (player == null) return NotFound();
-
             return View(player);
         }
 
@@ -134,15 +106,12 @@ namespace MCT.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var player = await _context.Players.FindAsync(id);
-            if (player != null) _context.Players.Remove(player);
-
-            await _context.SaveChangesAsync();
+            if (player != null)
+            {
+                _context.Players.Remove(player);
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool PlayerExists(int id)
-        {
-            return _context.Players.Any(e => e.PlayerId == id);
         }
     }
 }
