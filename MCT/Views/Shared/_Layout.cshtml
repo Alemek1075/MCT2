@@ -7,6 +7,8 @@
     
     <link rel="icon" type="image/png" href="~/favicon.png" />
 
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700&display=swap">
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
@@ -32,7 +34,6 @@
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Players" asp-action="Index">PLAYERS</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Users" asp-action="Index">USERS</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Tickets" asp-action="Index">TICKETS</a></li>
-    
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="SalesTickets" asp-action="Index">SALES</a></li>
                     </ul>
                 </div>
@@ -48,9 +49,28 @@
         </div>
     </div>
 
+    <div class="modal fade" id="valConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: #1f2326; border: 2px solid #ff4655; border-radius: 4px; box-shadow: 0 0 30px rgba(255, 70, 85, 0.3);">
+                <div class="modal-header border-bottom border-secondary" style="background-color: #111;">
+                    <h5 class="modal-title text-val-red m-0" style="font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 1px;">SYSTEM CONFIRMATION</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-5 text-center">
+                    <p id="valConfirmMessage" class="text-white fs-5 mb-0 font-monospace">Are you sure?</p>
+                </div>
+                <div class="modal-footer border-top border-secondary justify-content-center gap-3 p-3">
+                    <button type="button" class="btn btn-outline-val m-0" data-bs-dismiss="modal" style="width: 150px;">CANCEL</button>
+                    <button type="button" class="btn btn-danger-val m-0" id="valConfirmBtn" style="width: 150px;">CONFIRM</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

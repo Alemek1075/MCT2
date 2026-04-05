@@ -44,10 +44,9 @@ namespace MCT.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TicketId,TournamentId,UserId")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("TicketId,TournamentId,UserId,PurchaseDate")] Ticket ticket)
         {
             ModelState.Remove("Status");
-            ModelState.Remove("PurchaseDate");
             ModelState.Remove("Tournament");
             ModelState.Remove("User");
             ModelState.Remove("Payments");
@@ -57,25 +56,29 @@ namespace MCT.Controllers
 
             if (tournament != null)
             {
-                var today = DateTime.UtcNow.Date;
-                var startDate = tournament.StartDate?.Date ?? today;
-                var endDate = tournament.EndDate?.Date ?? today;
+                var startDate = tournament.StartDate?.Date ?? DateTime.UtcNow.Date;
                 var availableFrom = startDate.AddMonths(-1);
 
-                if (today < availableFrom || today > endDate)
+                if (!ticket.PurchaseDate.HasValue)
                 {
-                    ModelState.AddModelError("TournamentId", $"Tickets are only available between {availableFrom:MM/dd/yyyy} and {endDate:MM/dd/yyyy}.");
+                    ModelState.AddModelError("PurchaseDate", "Issue date is required.");
+                }
+                else
+                {
+                    var pDate = ticket.PurchaseDate.Value.Date;
+                    if (pDate < availableFrom || pDate > startDate)
+                    {
+                        ModelState.AddModelError("PurchaseDate", $"Issue date must be between {availableFrom:MM/dd/yyyy} and {startDate:MM/dd/yyyy}.");
+                    }
                 }
 
                 int activeTickets = tournament.Tickets.Count(t => t.Status != "Canceled");
-
                 if (tournament.Places <= 0 || activeTickets >= tournament.Places)
                 {
                     ModelState.AddModelError("TournamentId", "This event is completely sold out! No seats left.");
                 }
             }
 
-            ticket.PurchaseDate = DateTime.UtcNow.Date;
             ticket.Status = "Valid";
 
             if (ModelState.IsValid)

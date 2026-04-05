@@ -23,10 +23,13 @@ namespace MCT.Controllers
                 .ToListAsync();
 
             var rankings = teams.Select(t => {
-                int won = t.MatchTeamAs.Sum(m => m.ScoreA ?? 0) + t.MatchTeamBs.Sum(m => m.ScoreB ?? 0);
-                int lost = t.MatchTeamAs.Sum(m => m.ScoreB ?? 0) + t.MatchTeamBs.Sum(m => m.ScoreA ?? 0);
+                var completedAsA = t.MatchTeamAs.Where(m => m.WinnerId != null).ToList();
+                var completedAsB = t.MatchTeamBs.Where(m => m.WinnerId != null).ToList();
+
+                int won = completedAsA.Sum(m => m.ScoreA ?? 0) + completedAsB.Sum(m => m.ScoreB ?? 0);
+                int lost = completedAsA.Sum(m => m.ScoreB ?? 0) + completedAsB.Sum(m => m.ScoreA ?? 0);
                 int total = won + lost;
-                int matchesPlayed = t.MatchTeamAs.Count + t.MatchTeamBs.Count;
+                int matchesPlayed = completedAsA.Count + completedAsB.Count;
 
                 return new LeaderboardViewModel
                 {
@@ -36,11 +39,10 @@ namespace MCT.Controllers
                     WonRounds = won,
                     LostRounds = lost,
                     Diff = won - lost,
-                    WinPercentage = total > 0 ? (double)won / total * 100 : 0,
+                    WinPercentage = total > 0 ? ((double)won / total) * 100 : 0,
                     MatchesPlayed = matchesPlayed
                 };
             })
-            .Where(x => x.MatchesPlayed >= 3)
             .OrderByDescending(x => x.WinPercentage)
             .ThenByDescending(x => x.Diff)
             .ToList();

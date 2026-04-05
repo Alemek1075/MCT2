@@ -7,8 +7,8 @@
     <div class="d-flex justify-content-between align-items-end border-bottom border-secondary mb-4 pb-2">
         <h3 class="text-val-red m-0">MATCH DETAILS</h3>
         <div class="d-flex gap-2">
-            <a asp-action="Edit" asp-route-id="@Model?.MatchId" class="btn btn-primary btn-sm" style="padding: 4px 15px; font-size: 1rem;">ENTER SCORE</a>
-            <a asp-action="Index" class="btn-outline-val btn-sm" style="padding: 4px 15px; font-size: 1rem;">BACK</a>
+            <a asp-action="Edit" asp-route-id="@Model?.MatchId" class="btn btn-primary btn-action-sm">ENTER SCORE</a>
+            <a asp-action="Index" class="btn-outline-val btn-action-sm">BACK</a>
         </div>
     </div>
 
@@ -21,22 +21,22 @@
         
         <div class="d-flex justify-content-center align-items-center gap-4 my-5">
             <div class="text-end" style="flex: 1;">
-                <h2 class="text-white m-0" style="font-size: 2.5rem;">@(Model.TeamA?.Name ?? "TBD")</h2>
+                <h2 class="text-white m-0" style="font-size: 3.5rem;">@(Model.TeamA?.ShortCode ?? "TBD")</h2>
             </div>
-            <div class="px-4 border-start border-end border-secondary" style="min-width: 120px;">
-                <h1 class="text-val-red m-0" style="font-size: 4rem;">
+            <div class="px-4 border-start border-end border-secondary" style="min-width: 140px;">
+                <h1 class="text-val-red m-0" style="font-size: 4.5rem;">
                     @(Model.ScoreA ?? 0) <span class="text-muted fs-3">-</span> @(Model.ScoreB ?? 0)
                 </h1>
             </div>
             <div class="text-start" style="flex: 1;">
-                <h2 class="text-white m-0" style="font-size: 2.5rem;">@(Model.TeamB?.Name ?? "TBD")</h2>
+                <h2 class="text-white m-0" style="font-size: 3.5rem;">@(Model.TeamB?.ShortCode ?? "TBD")</h2>
             </div>
         </div>
         
         @if (Model.Winner != null)
         {
             <div class="mt-4 pt-4 border-top border-secondary">
-                <span class="badge bg-success px-4 py-2 fs-5">WINNER: @Model.Winner.Name</span>
+                <span class="badge bg-success px-4 py-2 fs-5">WINNER: @Model.Winner.ShortCode</span>
             </div>
         }
     </div>

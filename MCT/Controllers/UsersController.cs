@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -20,8 +18,8 @@ namespace MCT.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var mctContext = _context.Users.Include(u => u.RoleNavigation);
-            return View(await mctContext.ToListAsync());
+            var users = _context.Users.Include(u => u.RoleNavigation);
+            return View(await users.ToListAsync());
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -31,6 +29,7 @@ namespace MCT.Controllers
             var user = await _context.Users
                 .Include(u => u.RoleNavigation)
                 .FirstOrDefaultAsync(m => m.UserId == id);
+
             if (user == null) return NotFound();
 
             return View(user);
@@ -46,11 +45,6 @@ namespace MCT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("UserId,Username,Email,PasswordHash,Role")] User user)
         {
-            if (_context.Users.Any(u => u.Username == user.Username))
-            {
-                ModelState.AddModelError("Username", "Користувач з таким ім'ям вже існує.");
-            }
-
             if (ModelState.IsValid)
             {
                 _context.Add(user);
@@ -78,17 +72,6 @@ namespace MCT.Controllers
         {
             if (id != user.UserId) return NotFound();
 
-            if (_context.Users.Any(u => u.Username == user.Username && u.UserId != user.UserId))
-            {
-                ModelState.AddModelError("Username", "Користувач з таким ім'ям вже існує.");
-            }
-
-            // Перевірка: не даємо змінити роль, якщо юзер вже є в Players
-            if (user.Role != "Player" && _context.Players.Any(p => p.UserId == user.UserId))
-            {
-                ModelState.AddModelError("Role", "Цей користувач зареєстрований як гравець команди. Змінити роль неможливо.");
-            }
-
             if (ModelState.IsValid)
             {
                 try
@@ -98,8 +81,7 @@ namespace MCT.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!UserExists(user.UserId)) return NotFound();
-                    else throw;
+                    throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -114,6 +96,7 @@ namespace MCT.Controllers
             var user = await _context.Users
                 .Include(u => u.RoleNavigation)
                 .FirstOrDefaultAsync(m => m.UserId == id);
+
             if (user == null) return NotFound();
 
             return View(user);
@@ -123,34 +106,25 @@ namespace MCT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var user = await _context.Users
-                .Include(u => u.Players)
-                .Include(u => u.Tickets)
-                .Include(u => u.RoleNavigation)
-                .FirstOrDefaultAsync(m => m.UserId == id);
-
+            var user = await _context.Users.FindAsync(id);
             if (user != null)
             {
-                List<string> dependencies = new List<string>();
-                if (user.Players.Any()) dependencies.Add("Гравцях (Players)");
-                if (user.Tickets.Any()) dependencies.Add("Квитках (Tickets)");
-
-                if (dependencies.Any())
+                if (await _context.Players.AnyAsync(p => p.UserId == id))
                 {
-                    ViewBag.ErrorMessage = $"Не можна видалити, бо цей об'єкт задіяний в: {string.Join(", ", dependencies)}";
-                    return View(user);
+                    TempData["ErrorMessage"] = "Cannot delete: User is currently assigned as a Player in a team.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (await _context.Tickets.AnyAsync(t => t.UserId == id))
+                {
+                    TempData["ErrorMessage"] = "Cannot delete: User currently owns tournament tickets.";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 _context.Users.Remove(user);
                 await _context.SaveChangesAsync();
             }
-
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool UserExists(int id)
-        {
-            return _context.Users.Any(e => e.UserId == id);
         }
     }
 }

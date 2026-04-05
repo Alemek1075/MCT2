@@ -168,7 +168,6 @@ namespace MCT.Controllers
                     }
                     else
                     {
-                        // Зміщуємо всі дати матчів
                         foreach (var match in existingTournament.Matches)
                         {
                             if (match.ScheduledAt.HasValue)
@@ -207,21 +206,49 @@ namespace MCT.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var tournament = await _context.Tournaments
+                .FirstOrDefaultAsync(m => m.TournamentId == id);
+
+            if (tournament == null) return NotFound();
+
+            return View(tournament);
+        }
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var team = await _context.Teams.FindAsync(id);
-            if (team != null)
+            var tournament = await _context.Tournaments
+                .Include(t => t.Matches)
+                .Include(t => t.TournamentTeams)
+                .Include(t => t.Tickets)
+                .FirstOrDefaultAsync(m => m.TournamentId == id);
+
+            if (tournament != null)
             {
-                bool isInTournament = await _context.TournamentTeams.AnyAsync(tt => tt.TeamId == id);
-                if (isInTournament)
+                var matchIds = tournament.Matches.Select(m => m.MatchId).ToList();
+                if (await _context.Stats.AnyAsync(s => matchIds.Contains(s.MatchId ?? 0)))
                 {
-                    TempData["ErrorMessage"] = $"Cannot delete team '{team.Name}' because it is currently participating in an event.";
+                    TempData["ErrorMessage"] = "Cannot delete: Event has matches with recorded player stats.";
                     return RedirectToAction(nameof(Index));
                 }
 
-                _context.Teams.Remove(team);
+                var ticketIds = tournament.Tickets.Select(t => t.TicketId).ToList();
+                if (await _context.Payments.AnyAsync(p => ticketIds.Contains(p.TicketId ?? 0)))
+                {
+                    TempData["ErrorMessage"] = "Cannot delete: Tickets for this event have registered payments.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                _context.Matches.RemoveRange(tournament.Matches);
+                _context.TournamentTeams.RemoveRange(tournament.TournamentTeams);
+                _context.Tickets.RemoveRange(tournament.Tickets);
+
+                _context.Tournaments.Remove(tournament);
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));

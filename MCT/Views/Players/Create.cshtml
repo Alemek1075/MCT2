@@ -1,27 +1,28 @@
 ﻿@model MCT.Models.Player
 @{
-    ViewData["Title"] = "CREATE PLAYER";
+    ViewData["Title"] = "ASSIGN PLAYER";
 }
 
-<div class="page-container mx-auto" style="max-width: 600px;">
-    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">CREATE NEW PLAYER</h3>
+<div class="page-container mx-auto" style="max-width: 500px;">
+    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">ASSIGN NEW PLAYER</h3>
 
     <form asp-action="Create">
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-        <div class="mb-3">
-            <label asp-for="UserId" class="form-label">USER (ACCOUNT)</label>
-            <select asp-for="UserId" class="form-select" asp-items="ViewBag.User"></select>
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold bg-dark p-2 border border-danger rounded"></div>
+        
+        <div class="mb-4">
+            <label asp-for="UserId" class="form-label">USER ACCOUNT</label>
+            <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId"></select>
+            <span asp-validation-for="UserId" class="text-danger fw-bold d-block mt-1"></span>
         </div>
 
         <div class="mb-4">
-            <label asp-for="TeamId" class="form-label">TEAM</label>
-            <select asp-for="TeamId" class="form-select" asp-items="ViewBag.Team"></select>
+            <label asp-for="TeamId" class="form-label">ASSIGN TO TEAM</label>
+            <select asp-for="TeamId" class="form-select" asp-items="ViewBag.TeamId"></select>
         </div>
 
-        <div class="d-flex justify-content-between pt-3">
+        <div class="d-flex justify-content-end gap-3 pt-3 border-top border-secondary">
             <a asp-action="Index" class="btn-outline-val">CANCEL</a>
-            <button type="submit" class="btn btn-primary">CREATE PLAYER</button>
+            <button type="submit" class="btn btn-primary">ASSIGN PLAYER</button>
         </div>
     </form>
 </div>

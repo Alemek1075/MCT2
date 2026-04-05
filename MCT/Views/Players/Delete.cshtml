@@ -1,28 +1,20 @@
 ﻿@model MCT.Models.Player
 @{
-    ViewData["Title"] = "DELETE PLAYER";
+    ViewData["Title"] = "REMOVE PLAYER";
 }
 
-<div class="page-container mx-auto" style="max-width: 600px;">
-    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">DELETE PLAYER CONFIRMATION</h3>
-    
-    <div class="alert alert-danger bg-dark border-danger text-white mb-4 fs-6 fw-bold">
-        Are you sure you want to delete this player?
+<div class="page-container mx-auto" style="max-width: 500px;">
+    <h3 class="text-danger mb-4 border-bottom border-secondary pb-2">REMOVE PLAYER ASSIGNMENT</h3>
+
+    <div class="val-card p-4 text-center mb-4 border-danger">
+        <h4 class="text-white mb-4">Are you sure you want to remove this player?</h4>
+        <h1 class="text-val-orange m-0">@Model.User?.Username</h1>
+        <p class="text-muted mt-2 mb-0">TEAM: <span class="text-white">@Model.Team?.Name</span></p>
     </div>
 
-    <div class="p-4 mb-4" style="background-color: #111111; border-radius: 8px; border-left: 4px solid #ff4655;">
-        <label class="form-label text-muted d-block mb-1">PLAYER ACCOUNT</label>
-        <h3 class="text-white fw-bold mb-4">@(Model.User?.Username ?? "Unknown User")</h3>
-        
-        <label class="form-label text-muted d-block mb-1">CURRENT TEAM</label>
-        <h4 class="text-val-orange fw-bold fs-5 mb-0">@(Model.Team?.Name ?? "No Team")</h4>
-    </div>
-
-    <form asp-action="Delete">
+    <form asp-action="Delete" class="d-flex justify-content-end gap-3 pt-3 border-top border-secondary">
         <input type="hidden" asp-for="PlayerId" />
-        <div class="d-flex justify-content-end gap-3 pt-2">
-            <a asp-action="Index" class="btn-outline-val">CANCEL</a>
-            <button type="submit" class="btn btn-danger-val">PERMANENTLY DELETE</button>
-        </div>
+        <a asp-action="Index" class="btn-outline-val">CANCEL</a>
+        <button type="submit" class="btn btn-danger-val">CONFIRM REMOVE</button>
     </form>
 </div>

@@ -3,29 +3,18 @@
     ViewData["Title"] = "DELETE USER";
 }
 
-<div class="page-container mx-auto" style="max-width: 600px;">
-    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">DELETE USER CONFIRMATION</h3>
-    
-    <div class="alert alert-danger bg-dark border-danger text-white mb-4 fs-6 fw-bold">
-        Are you sure you want to delete this user account?
+<div class="page-container mx-auto" style="max-width: 500px;">
+    <h3 class="text-danger mb-4 border-bottom border-secondary pb-2">DELETE ACCOUNT</h3>
+
+    <div class="val-card p-4 text-center mb-4 border-danger">
+        <h4 class="text-white mb-4">Are you sure you want to delete this user?</h4>
+        <h1 class="text-val-orange m-0">@Model.Username</h1>
+        <p class="text-muted mt-2 mb-0">@Model.Email</p>
     </div>
 
-    <div class="p-4 mb-4" style="background-color: #111111; border-radius: 8px; border-left: 4px solid #ff4655;">
-        <label class="form-label text-muted d-block mb-1">USERNAME</label>
-        <h3 class="text-white fw-bold mb-3">@Model.Username</h3>
-        
-        <label class="form-label text-muted d-block mb-1">EMAIL</label>
-        <p class="text-white fs-5 mb-3">@Model.Email</p>
-        
-        <label class="form-label text-muted d-block mb-1">ROLE</label>
-        <span class="badge bg-dark border border-secondary text-val-orange fs-6">@(Model.Role ?? "TBD")</span>
-    </div>
-
-    <form asp-action="Delete">
+    <form asp-action="Delete" class="d-flex justify-content-end gap-3 pt-3 border-top border-secondary">
         <input type="hidden" asp-for="UserId" />
-        <div class="d-flex justify-content-end gap-3 pt-2">
-            <a asp-action="Index" class="btn-outline-val">CANCEL</a>
-            <button type="submit" class="btn btn-danger-val">PERMANENTLY DELETE</button>
-        </div>
+        <a asp-action="Index" class="btn-outline-val">CANCEL</a>
+        <button type="submit" class="btn btn-danger-val">CONFIRM DELETE</button>
     </form>
 </div>

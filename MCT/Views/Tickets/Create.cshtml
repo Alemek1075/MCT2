@@ -15,12 +15,19 @@
                 <span class="text-muted font-monospace" style="font-size: 0.85rem;">PRICE: <span id="VisualPrice" class="text-val-orange fw-bold fs-6">$0</span></span>
             </div>
             <select asp-for="TournamentId" id="TournamentSelect" class="form-select" asp-items="ViewBag.TournamentId"></select>
-            <span asp-validation-for="TournamentId" class="text-danger"></span>
+            <span asp-validation-for="TournamentId" class="text-danger fw-bold d-block mt-1"></span>
         </div>
 
         <div class="mb-4">
             <label asp-for="UserId" class="form-label">OWNER (USER)</label>
             <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId"></select>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="PurchaseDate" class="form-label">ISSUE DATE</label>
+            <input asp-for="PurchaseDate" type="date" class="form-control" required />
+            <span class="text-muted d-block mt-1" style="font-size: 0.75rem;">Can only be issued within 1 month prior to the event start.</span>
+            <span asp-validation-for="PurchaseDate" class="text-danger fw-bold d-block mt-1"></span>
         </div>
 
         <div class="d-flex justify-content-end gap-3 pt-3 border-top border-secondary">
@@ -39,15 +46,12 @@
                     <text>@t.TournamentId : @Math.Floor(price),</text>
             }
         };
-
         const select = document.getElementById('TournamentSelect');
         const priceLabel = document.getElementById('VisualPrice');
-
         function updatePrice() {
             const id = select.value;
             priceLabel.textContent = '$' + (tournamentPrices[id] || 0);
         }
-
         select.addEventListener('change', updatePrice);
         updatePrice();
     </script>

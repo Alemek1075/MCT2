@@ -48,8 +48,8 @@
                             foreach (var round in rounds)
                             {
                                 <div class="bracket-round d-flex flex-column justify-content-around" style="width: 250px;">
-                                    <h5 class="text-muted text-center mb-2 position-absolute w-100" style="top: -30px; font-family: 'Bebas Neue', sans-serif;">ROUND @roundNum</h5>
-                                    
+                                    <h5 class="bracket-round-title">ROUND @roundNum</h5>
+    
                                     @foreach (var match in round.OrderBy(m => m.ScheduledAt))
                                     {
                                         bool isTbdA = match.TeamA == null;
@@ -70,7 +70,6 @@
                                                 </span>
                                                 <span class="font-monospace fw-bold @(teamBWon ? "text-white" : "text-val-orange")">@(isTbdB ? "-" : (match.ScoreB?.ToString() ?? "0"))</span>
                                             </div>
-                                            
                                             <a asp-controller="Matches" asp-action="Details" asp-route-id="@match.MatchId" class="stretched-link" title="View Match"></a>
                                         </div>
                                     }
