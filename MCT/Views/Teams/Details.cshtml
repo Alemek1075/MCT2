@@ -1,53 +1,29 @@
 ﻿@model MCT.Models.Team
+
 @{
-    ViewData["Title"] = "TEAM DETAILS";
+    ViewData["Title"] = "Team Details";
 }
 
-<div class="page-container mx-auto" style="max-width: 800px;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0 text-val-red">TEAM DETAILS</h2>
-        <a asp-action="Index" class="btn-outline-val">BACK TO LIST</a>
-    </div>
+<h1>Details</h1>
 
-    <div class="text-center mb-5 mt-4">
-        <h1 class="display-1 text-white fw-bold mb-0">@Model.Name</h1>
-        <h2 class="text-val-orange mt-2" style="font-family: 'Bebas Neue', sans-serif;">
-            [@Model.ShortCode]
-        </h2>
-    </div>
-
-    <div class="row text-center mt-4">
-        <div class="col-6 border-end border-secondary mb-4">
-            <label>REGION</label>
-            <h3 class="text-white mt-2">@(Model.Region ?? "TBD")</h3>
-        </div>
-        <div class="col-6 mb-4">
-            <label>ACTIVE MEMBERS</label>
-            <h3 class="text-val-red mt-2">@(Model.MemberCount ?? 0)</h3>
-        </div>
-    </div>
-
-    <div class="mt-5 border-top border-secondary pt-4 text-start mx-auto" style="max-width: 500px;">
-        <h3 class="text-val-red mb-3 text-center" style="font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px;">ROSTER</h3>
+<div>
+    <h4>Team</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Name</dt>
+        <dd class="col-sm-10">@Model.Name</dd>
         
-        @if (Model.Players != null && Model.Players.Any())
-        {
-            <div class="list-group rounded-0">
-                @foreach (var player in Model.Players)
-                {
-                    <a asp-controller="Players" asp-action="Details" asp-route-id="@player.PlayerId" class="list-group-item list-group-item-action bg-transparent text-white border-secondary fs-5 py-3">
-                        <span class="text-val-orange me-2 fw-bold">#</span> @(player.User?.Username ?? "Unknown")
-                    </a>
-                }
-            </div>
-        }
-        else
-        {
-            <p class="text-muted text-center fs-5 mt-3">No players currently in this roster.</p>
-        }
-    </div>
+        <dt class="col-sm-2">Short Code</dt>
+        <dd class="col-sm-10">@Model.ShortCode</dd>
+        
+        <dt class="col-sm-2">Region</dt>
+        <dd class="col-sm-10">@Model.Region</dd>
 
-    <div class="text-center mt-5">
-        <a asp-action="Edit" asp-route-id="@Model?.TeamId" class="btn btn-primary btn-lg w-50">EDIT TEAM DATA</a>
-    </div>
+        <dt class="col-sm-2">Players Count</dt>
+        <dd class="col-sm-10">@Model.ActualMemberCount</dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.TeamId" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>

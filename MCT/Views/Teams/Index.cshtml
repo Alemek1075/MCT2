@@ -1,39 +1,38 @@
 ﻿@model IEnumerable<MCT.Models.Team>
+
 @{
-    ViewData["Title"] = "TEAMS";
+    ViewData["Title"] = "Teams";
 }
 
-<div class="d-flex justify-content-between align-items-end mb-3 mt-3">
-    <h2 class="mb-0 text-white">TEAMS</h2>
-    <a asp-action="Create" class="btn-outline-val">CREATE NEW</a>
-</div>
-
-<div class="page-container mt-0 p-4">
-    <table class="table table-dark table-borderless table-hover mb-0 align-middle">
-        <thead>
-            <tr>
-                <th class="text-white">TEAM NAME</th>
-                <th class="text-white">TAG</th>
-                <th class="text-white">REGION</th>
-                <th class="text-center text-white">MEMBERS</th>
-                <th class="text-end text-white">ACTIONS</th>
-            </tr>
-        </thead>
-        <tbody>
+<h1>Teams</h1>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create Team</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Short Code</th>
+            <th>Region</th>
+            <th>Players Count</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
             @foreach (var item in Model)
             {
                 <tr>
-                    <td class="fw-bold fs-5 text-white">@Html.DisplayFor(modelItem => item.Name)</td>
-                    <td><span class="badge bg-dark border border-secondary fs-6 text-white">@Html.DisplayFor(modelItem => item.ShortCode)</span></td>
-                    <td class="text-white fs-6">@Html.DisplayFor(modelItem => item.Region)</td>
-                    <td class="text-center text-val-red fw-normal fs-5">@(item.MemberCount ?? 0)</td>
-                    <td class="text-end action-links">
-                        <a asp-action="Edit" asp-route-id="@item.TeamId">Edit</a>
+                    <td>@item.Name</td>
+                    <td>@item.ShortCode</td>
+                    <td>@item.Region</td>
+                    <td>@(item.Players != null ? item.Players.Count : 0)</td>
+                    <td>
                         <a asp-action="Details" asp-route-id="@item.TeamId">Details</a>
-                        <a asp-action="Delete" asp-route-id="@item.TeamId" class="text-danger">Delete</a>
                     </td>
                 </tr>
             }
-        </tbody>
-    </table>
-</div>
+        }
+    </tbody>
+</table>

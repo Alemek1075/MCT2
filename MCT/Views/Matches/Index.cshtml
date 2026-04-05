@@ -1,43 +1,34 @@
 ﻿@model IEnumerable<MCT.Models.Match>
+
 @{
-    ViewData["Title"] = "MATCHES";
+    ViewData["Title"] = "Matches";
 }
 
-<div class="d-flex justify-content-between align-items-end mb-3 mt-3">
-    <h2 class="mb-0 text-white">MATCHES</h2>
-    <a asp-action="Create" class="btn-outline-val">CREATE NEW</a>
-</div>
-
-<div class="page-container mt-0 p-4">
-    <table class="table table-dark table-borderless table-hover mb-0 align-middle">
-        <thead>
+<h1>Matches</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tournament</th>
+            <th>Team A</th>
+            <th>Team B</th>
+            <th>Score</th>
+            <th>Scheduled At</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
             <tr>
-                <th class="text-white">TEAM A</th>
-                <th class="text-center text-white">SCORE</th>
-                <th class="text-white">TEAM B</th>
-                <th class="text-white">SCHEDULED</th>
-                <th class="text-white">TOURNAMENT</th>
-                <th class="text-end text-white">ACTIONS</th>
+                <td>@item.Tournament?.Description</td>
+                <td>@item.TeamA?.Name</td>
+                <td>@item.TeamB?.Name</td>
+                <td>@item.ScoreA : @item.ScoreB</td>
+                <td>@(item.ScheduledAt?.ToString("g") ?? "-")</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.MatchId" class="btn btn-sm btn-info">Details</a>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td class="fw-bold fs-5 text-white">@(item.TeamA?.Name ?? "TBD")</td>
-                    <td class="text-center text-val-red fw-bold fs-5" style="font-family: 'Bebas Neue', sans-serif;">
-                        @(item.ScoreA ?? 0) - @(item.ScoreB ?? 0)
-                    </td>
-                    <td class="fw-bold fs-5 text-white">@(item.TeamB?.Name ?? "TBD")</td>
-                    <td class="text-white fs-6">@(item.ScheduledAt?.ToString("MM/dd/yyyy HH:mm") ?? "TBD")</td>
-                    <td class="text-white fs-6">@(item.Tournament?.Description ?? "TBD")</td>
-                    <td class="text-end action-links">
-                        <a asp-action="Edit" asp-route-id="@item.MatchId">Edit</a>
-                        <a asp-action="Details" asp-route-id="@item.MatchId">Details</a>
-                        <a asp-action="Delete" asp-route-id="@item.MatchId" class="text-danger">Delete</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+        }
+    </tbody>
+</table>

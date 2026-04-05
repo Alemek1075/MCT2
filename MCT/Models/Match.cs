@@ -1,15 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MCT.Models;
 
 public partial class Match
 {
     public int MatchId { get; set; }
-    [Required] public int? TournamentId { get; set; }
-    [Required] public int? TeamAId { get; set; }
-    [Required] public int? TeamBId { get; set; }
+
+    [Required]
+    public int? TournamentId { get; set; }
+
+    [Required]
+    public int? TeamAId { get; set; }
+
+    [Required]
+    public int? TeamBId { get; set; }
+
     public int? WinnerId { get; set; }
 
     private DateTime? _scheduledAt;
@@ -20,9 +28,14 @@ public partial class Match
         set => _scheduledAt = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
     }
 
-    [Range(0, int.MaxValue)] public int? ScoreA { get; set; }
-    [Range(0, int.MaxValue)] public int? ScoreB { get; set; }
-    [Required] public string? MatchType { get; set; }
+    [Range(0, int.MaxValue)]
+    public int? ScoreA { get; set; }
+
+    [Range(0, int.MaxValue)]
+    public int? ScoreB { get; set; }
+
+    [Required]
+    public string? MatchType { get; set; }
 
     public virtual MatchType? MatchTypeNavigation { get; set; }
     public virtual ICollection<Stat> Stats { get; set; } = new List<Stat>();

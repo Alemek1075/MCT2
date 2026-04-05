@@ -1,43 +1,54 @@
 ﻿@model IEnumerable<MCT.Models.Tournament>
+
 @{
-    ViewData["Title"] = "EVENTS";
+    ViewData["Title"] = "Tournaments";
 }
 
-<div class="d-flex justify-content-between align-items-end mb-3 mt-3">
-    <h2 class="mb-0 text-white">EVENTS</h2>
-    <a asp-action="Create" class="btn-outline-val">CREATE NEW</a>
-</div>
-
-<div class="page-container mt-0 p-4">
-    <table class="table table-dark table-borderless table-hover mb-0 align-middle">
-        <thead>
+<h1>Tournaments</h1>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create Tournament</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Prize Pool</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
             <tr>
-                <th class="text-white">EVENT NAME</th>
-                <th class="text-white">LOCATION</th>
-                <th class="text-white">START DATE</th>
-                <th class="text-white">END DATE</th>
-                <th class="text-white">PRIZE</th>
-                <th class="text-white">STATUS</th>
-                <th class="text-end text-white">ACTIONS</th>
+                <td>@item.Description</td>
+                <td>@item.Location</td>
+                <td>@item.Price</td>
+                <td>@(item.StartDate?.ToShortDateString() ?? "-")</td>
+                <td>@(item.EndDate?.ToShortDateString() ?? "-")</td>
+                <td>
+                    @if (item.CurrentStatus == "Planned")
+                    {
+                        <span class="badge bg-secondary">Planned</span>
+                    }
+                    else if (item.CurrentStatus == "Ongoing")
+                    {
+
+                        <span class="badge bg-success">Ongoing</span>
+                    }
+                    else
+                    {
+
+                        <span class="badge bg-primary">Completed</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.TournamentId" class="btn btn-sm btn-info">Details</a>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td class="fw-bold fs-5 text-white">@item.Description</td>
-                    <td class="text-white fs-6">@item.Location</td>
-                    <td class="text-white fs-6">@(item.StartDate?.ToString("MM/dd/yyyy") ?? "TBD")</td>
-                    <td class="text-white fs-6">@(item.EndDate?.ToString("MM/dd/yyyy") ?? "TBD")</td>
-                    <td class="text-val-orange fw-bold fs-5">$@(Math.Floor(item.Price ?? 0))</td>
-                    <td><span class="badge bg-dark border border-secondary fs-6 text-white">@item.Status</span></td>
-                    <td class="text-end action-links">
-                        <a asp-action="Edit" asp-route-id="@item.TournamentId">Edit</a>
-                        <a asp-action="Details" asp-route-id="@item.TournamentId">Details</a>
-                        <a asp-action="Delete" asp-route-id="@item.TournamentId" class="text-danger">Delete</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+        }
+    </tbody>
+</table>

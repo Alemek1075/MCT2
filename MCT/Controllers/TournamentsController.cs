@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MCT.Models;
 
@@ -20,8 +19,7 @@ namespace MCT.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var mctContext = _context.Tournaments.Include(t => t.StatusNavigation);
-            return View(await mctContext.ToListAsync());
+            return View(await _context.Tournaments.ToListAsync());
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -29,7 +27,12 @@ namespace MCT.Controllers
             if (id == null) return NotFound();
 
             var tournament = await _context.Tournaments
-                .Include(t => t.StatusNavigation)
+                .Include(t => t.Matches)
+                    .ThenInclude(m => m.TeamA)
+                .Include(t => t.Matches)
+                    .ThenInclude(m => m.TeamB)
+                .Include(t => t.TournamentTeams)
+                    .ThenInclude(tt => tt.Team)
                 .FirstOrDefaultAsync(m => m.TournamentId == id);
 
             if (tournament == null) return NotFound();
@@ -37,175 +40,71 @@ namespace MCT.Controllers
             return View(tournament);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            var statuses = new List<SelectListItem> {
-                new SelectListItem { Value = "Active", Text = "Automatic" },
-                new SelectListItem { Value = "Canceled", Text = "Canceled" }
-            };
-            ViewData["Status"] = new SelectList(statuses, "Value", "Text");
+            ViewBag.Teams = await _context.Teams.ToListAsync();
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TournamentId,Description,Location,StartDate,EndDate,Price,Status")] Tournament tournament)
+        public async Task<IActionResult> Create(Tournament tournament)
         {
-            if (ModelState.IsValid)
+            ModelState.Remove("EndDate");
+            ModelState.Remove("Status");
+
+            int teamCount = tournament.SelectedTeamIds?.Count ?? 0;
+
+            if (teamCount != 2 && teamCount != 4 && teamCount != 8)
             {
-                var today = DateTime.UtcNow.Date;
-
-                if (tournament.Status == "Active")
-                {
-                    if (tournament.StartDate.HasValue && tournament.EndDate.HasValue)
-                    {
-                        var start = tournament.StartDate.Value.Date;
-                        var end = tournament.EndDate.Value.Date;
-
-                        if (today < start)
-                            tournament.Status = "Planned";
-                        else if (today >= start && today <= end)
-                            tournament.Status = "Ongoing";
-                        else
-                            tournament.Status = "Completed";
-                    }
-                    else
-                    {
-                        tournament.Status = "Planned";
-                    }
-                }
-
-
-                _context.Add(tournament);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError("SelectedTeamIds", "The number of participating teams must be exactly 2, 4, or 8.");
             }
 
-            var statuses = new List<SelectListItem> {
-                new SelectListItem { Value = "Active", Text = "Automatic" },
-                new SelectListItem { Value = "Canceled", Text = "Canceled" }
-            };
-            ViewData["Status"] = new SelectList(statuses, "Value", "Text", tournament.Status);
-            return View(tournament);
-        }
-
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var tournament = await _context.Tournaments.FindAsync(id);
-            if (tournament == null) return NotFound();
-
-            var statuses = new List<SelectListItem> {
-                new SelectListItem { Value = "Active", Text = "Automatic" },
-                new SelectListItem { Value = "Canceled", Text = "Canceled" }
-            };
-
-            var currentStatus = tournament.Status == "Canceled" ? "Canceled" : "Active";
-            ViewData["Status"] = new SelectList(statuses, "Value", "Text", currentStatus);
-
-            return View(tournament);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("TournamentId,Description,Location,StartDate,EndDate,Price,Status")] Tournament tournament)
-        {
-            if (id != tournament.TournamentId) return NotFound();
-
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    if (tournament.StartDate.HasValue)
-                        tournament.StartDate = DateTime.SpecifyKind(tournament.StartDate.Value, DateTimeKind.Utc);
-                    if (tournament.EndDate.HasValue)
-                        tournament.EndDate = DateTime.SpecifyKind(tournament.EndDate.Value, DateTimeKind.Utc);
-
-                    if (tournament.Status == "Active")
-                    {
-                        var today = DateTime.UtcNow.Date;
-                        if (tournament.StartDate.HasValue && tournament.EndDate.HasValue)
-                        {
-                            var start = tournament.StartDate.Value.Date;
-                            var end = tournament.EndDate.Value.Date;
-
-                            if (today < start) tournament.Status = "Planned";
-                            else if (today >= start && today <= end) tournament.Status = "Ongoing";
-                            else tournament.Status = "Completed";
-                        }
-                        else
-                        {
-                            tournament.Status = "Planned";
-                        }
-                    }
-
-                    _context.Update(tournament);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TournamentExists(tournament.TournamentId)) return NotFound();
-                    else throw;
-                }
-                return RedirectToAction(nameof(Index));
+                ViewBag.Teams = await _context.Teams.ToListAsync();
+                return View(tournament);
             }
 
-            var statuses = new List<SelectListItem> {
-                new SelectListItem { Value = "Active", Text = "Automatic" },
-                new SelectListItem { Value = "Canceled", Text = "Canceled" }
-            };
-            ViewData["Status"] = new SelectList(statuses, "Value", "Text", tournament.Status);
-            return View(tournament);
-        }
-
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var tournament = await _context.Tournaments
-                .Include(t => t.StatusNavigation)
-                .FirstOrDefaultAsync(m => m.TournamentId == id);
-
-            if (tournament == null) return NotFound();
-
-            return View(tournament);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var tournament = await _context.Tournaments
-                .Include(t => t.Matches)
-                .Include(t => t.Tickets)
-                .Include(t => t.TournamentTeams)
-                .Include(t => t.StatusNavigation)
-                .FirstOrDefaultAsync(m => m.TournamentId == id);
-
-            if (tournament != null)
+            int durationDays = (int)Math.Log2(teamCount);
+            if (tournament.StartDate.HasValue)
             {
-                List<string> dependencies = new List<string>();
-                if (tournament.Matches.Any()) dependencies.Add("Matches");
-                if (tournament.Tickets.Any()) dependencies.Add("Tickets");
-                if (tournament.TournamentTeams.Any()) dependencies.Add("TournamentTeams");
-
-                if (dependencies.Any())
-                {
-                    ViewBag.ErrorMessage = $"Cannot delete because this object is used in: {string.Join(", ", dependencies)}";
-                    return View(tournament);
-                }
-
-                _context.Tournaments.Remove(tournament);
-                await _context.SaveChangesAsync();
+                tournament.EndDate = tournament.StartDate.Value.AddDays(durationDays);
             }
 
+            tournament.Status = tournament.CurrentStatus;
+
+            _context.Tournaments.Add(tournament);
+            await _context.SaveChangesAsync();
+
+            foreach (var teamId in tournament.SelectedTeamIds)
+            {
+                _context.TournamentTeams.Add(new TournamentTeam
+                {
+                    TournamentId = tournament.TournamentId,
+                    TeamId = teamId
+                });
+            }
+
+            var rng = new Random();
+            var shuffledTeams = tournament.SelectedTeamIds.OrderBy(x => rng.Next()).ToList();
+
+            for (int i = 0; i < shuffledTeams.Count; i += 2)
+            {
+                _context.Matches.Add(new Match
+                {
+                    TournamentId = tournament.TournamentId,
+                    TeamAId = shuffledTeams[i],
+                    TeamBId = shuffledTeams[i + 1],
+                    ScoreA = 0,
+                    ScoreB = 0,
+                    ScheduledAt = tournament.StartDate,
+                    MatchType = "Auto"
+                });
+            }
+
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool TournamentExists(int id)
-        {
-            return _context.Tournaments.Any(e => e.TournamentId == id);
         }
     }
 }
