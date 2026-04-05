@@ -3,47 +3,20 @@
     ViewData["Title"] = "DELETE TICKET";
 }
 
-<div class="page-container mx-auto" style="max-width: 600px;">
-    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">DELETE TICKET CONFIRMATION</h3>
-    
-    <div class="alert alert-danger bg-dark border-danger text-white mb-4 fs-6 fw-bold">
-        Are you sure you want to delete this ticket?
+<div class="page-container mx-auto" style="max-width: 500px;">
+    <h3 class="text-danger mb-4 border-bottom border-secondary pb-2">REVOKE TICKET</h3>
+
+    <div class="val-card p-4 text-center mb-4">
+        <h4 class="text-white">Are you sure you want to revoke this ticket?</h4>
+        <p class="text-muted mt-3 mb-1">OWNER</p>
+        <h2 class="text-val-orange">@Model.User?.Username</h2>
+        <p class="text-muted mt-3 mb-1">EVENT</p>
+        <h4 class="text-white">@Model.Tournament?.Description</h4>
     </div>
 
-    <div class="p-4 mb-4" style="background-color: #111111; border-radius: 8px; border-left: 4px solid #ff4655;">
-        <div class="row mb-4">
-            <div class="col-6 border-end border-secondary">
-                <label class="form-label text-muted d-block mb-1">HOLDER</label>
-                <span class="text-white fs-4 fw-bold">@(Model.User?.Username ?? "Unknown")</span>
-            </div>
-            <div class="col-6 ps-4">
-                <label class="form-label text-muted d-block mb-1">EVENT</label>
-                <span class="text-white fs-5 fw-bold">@(Model.Tournament?.Description ?? "TBD")</span>
-            </div>
-        </div>
-
-        <div class="row mb-4">
-            <div class="col-6 border-end border-secondary">
-                <label class="form-label text-muted d-block mb-1">QR CODE</label>
-                <span class="text-val-orange fs-5 font-monospace">@Model.QrCode</span>
-            </div>
-            <div class="col-6 ps-4">
-                <label class="form-label text-muted d-block mb-1">STATUS</label>
-                <span class="badge bg-dark border border-secondary text-white fs-6">@(Model.Status ?? "TBD")</span>
-            </div>
-        </div>
-
-        <div class="border-top border-secondary pt-3 mt-2">
-            <label class="form-label text-muted d-block mb-1">PURCHASE DATE</label>
-            <span class="text-white fs-6">@(Model.PurchaseDate?.ToString("MM/dd/yyyy HH:mm") ?? "TBD")</span>
-        </div>
-    </div>
-
-    <form asp-action="Delete">
+    <form asp-action="Delete" class="d-flex justify-content-end gap-3 pt-3 border-top border-secondary">
         <input type="hidden" asp-for="TicketId" />
-        <div class="d-flex justify-content-end gap-3 pt-2">
-            <a asp-action="Index" class="btn-outline-val">CANCEL</a>
-            <button type="submit" class="btn btn-danger-val">PERMANENTLY DELETE</button>
-        </div>
+        <a asp-action="Index" class="btn-outline-val">CANCEL</a>
+        <button type="submit" class="btn btn-danger-val">CONFIRM REVOKE</button>
     </form>
 </div>

@@ -3,44 +3,41 @@
     ViewData["Title"] = "EDIT TICKET";
 }
 
-<div class="page-container mx-auto" style="max-width: 600px;">
-    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">EDIT TICKET DATA</h3>
+<div class="page-container mx-auto" style="max-width: 500px;">
+    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">MANAGE TICKET</h3>
+
+    <div class="val-card p-3 mb-4 text-center">
+        <p class="text-muted mb-1 form-label">EVENT</p>
+        <h5 class="text-white m-0">@(Model.Tournament?.Description ?? "TBD")</h5>
+    </div>
 
     <form asp-action="Edit">
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
         <input type="hidden" asp-for="TicketId" />
-
-        <div class="mb-3">
-            <label asp-for="UserId" class="form-label">USER</label>
-            <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId"></select>
-            <span asp-validation-for="UserId" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="TournamentId" class="form-label">EVENT</label>
-            <select asp-for="TournamentId" class="form-select" asp-items="ViewBag.TournamentId"></select>
-            <span asp-validation-for="TournamentId" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="PurchaseDate" class="form-label">PURCHASE DATE</label>
-            <input asp-for="PurchaseDate" class="form-control" type="datetime-local" />
-            <span asp-validation-for="PurchaseDate" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="Status" class="form-label">STATUS</label>
-            <select asp-for="Status" class="form-select" asp-items="ViewBag.Status"></select>
-            <span asp-validation-for="Status" class="text-danger"></span>
-        </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold"></div>
 
         <div class="mb-4">
-            <label asp-for="QrCode" class="form-label">QR CODE (16 DIGITS)</label>
-            <input asp-for="QrCode" class="form-control font-monospace" type="text" pattern="\d{16}" minlength="16" maxlength="16" title="Exactly 16 digits required" />
-            <span asp-validation-for="QrCode" class="text-danger"></span>
+            <label asp-for="UserId" class="form-label">OWNER (USER)</label>
+            <select name="UserId" class="form-select" asp-items="ViewBag.UserId"></select>
         </div>
 
-        <div class="d-flex justify-content-end gap-3 pt-3">
+        <div class="mb-4 p-3 border border-secondary" style="background-color: #1a1a1a; border-radius: 4px;">
+            <label class="form-label text-val-orange mb-2">TICKET VALIDITY</label>
+            <select name="IsCanceled" class="form-select">
+                @if (Model.Status == "Canceled")
+                {
+                    <option value="true" selected>🔴 CANCELED (REVOKED)</option>
+                    <option value="false">🟢 RESTORE TO VALID</option>
+                }
+                else
+                {
+                    <option value="false" selected>🟢 ACTIVE (VALID)</option>
+                    <option value="true">🔴 CANCEL TICKET</option>
+                }
+            </select>
+            <span class="text-muted d-block mt-2" style="font-size: 0.75rem;">Canceled tickets do not take up seats. Restoring requires available places.</span>
+        </div>
+
+        <div class="d-flex justify-content-end gap-3 pt-3 border-top border-secondary">
             <a asp-action="Index" class="btn-outline-val">CANCEL</a>
             <button type="submit" class="btn btn-primary">SAVE CHANGES</button>
         </div>

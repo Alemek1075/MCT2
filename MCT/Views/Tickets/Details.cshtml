@@ -1,35 +1,41 @@
 ﻿@model MCT.Models.Ticket
 @{
     ViewData["Title"] = "TICKET DETAILS";
+    string displayStatus = Model.Status == "Canceled" ? "CANCELED" :
+                          (Model.Tournament?.EndDate < DateTime.UtcNow.Date ? "USED" : "VALID");
+    string badgeClass = displayStatus == "CANCELED" ? "bg-danger" :
+                       (displayStatus == "USED" ? "bg-secondary" : "bg-success");
 }
 
-<div class="page-container mx-auto" style="max-width: 600px;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0 text-val-red">TICKET DETAILS</h2>
-        <a asp-action="Index" class="btn-outline-val">BACK TO LIST</a>
-    </div>
-
-    <div class="text-center mb-5 mt-4">
-        <h2 class="text-white fw-bold mb-0">@(Model.Tournament?.Description ?? "TBD")</h2>
-        <h4 class="text-val-orange mt-2">USER // @(Model.User?.Username ?? "TBD")</h4>
-    </div>
-
-    <div class="row text-center mt-4 border-top border-secondary pt-4">
-        <div class="col-6 border-end border-secondary mb-4">
-            <label>PURCHASE DATE</label>
-            <h4 class="text-white mt-2">@(Model.PurchaseDate?.ToString("MM/dd/yyyy HH:mm") ?? "TBD")</h4>
-        </div>
-        <div class="col-6 mb-4">
-            <label>STATUS</label>
-            <h4 class="text-val-red mt-2">@(Model.Status ?? "TBD")</h4>
-        </div>
-        <div class="col-12 mt-2">
-            <label>QR CODE</label>
-            <h3 class="text-val-orange font-monospace mt-2">@Model.QrCode</h3>
+<div class="page-container mx-auto" style="max-width: 500px;">
+    <div class="d-flex justify-content-between align-items-end border-bottom border-secondary mb-4 pb-2">
+        <h3 class="text-val-red m-0">TICKET INFO</h3>
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model?.TicketId" class="btn btn-primary btn-sm btn-action-sm">MANAGE</a>
+            <a asp-action="Index" class="btn-outline-val btn-sm btn-action-sm">BACK</a>
         </div>
     </div>
 
-    <div class="text-center mt-4">
-        <a asp-action="Edit" asp-route-id="@Model?.TicketId" class="btn btn-primary btn-lg w-100">EDIT TICKET DATA</a>
+    <div class="val-card p-5 text-center position-relative overflow-hidden">
+        <div class="position-absolute" style="top: 20px; right: -30px; transform: rotate(45deg); background-color: #333; width: 120px; text-align: center;">
+            <span class="text-white fw-bold font-monospace" style="font-size: 0.9rem;">#@Model.TicketId.ToString("00000")</span>
+        </div>
+
+        <p class="text-muted mb-1 form-label">EVENT</p>
+        <h3 class="text-white mb-4">@(Model.Tournament?.Description ?? "N/A")</h3>
+        
+        <p class="text-muted mb-1 form-label">OWNER</p>
+        <h4 class="text-val-orange mb-4">@(Model.User?.Username ?? "N/A")</h4>
+        
+        <div class="row border-top border-secondary pt-4 mt-2">
+            <div class="col-6 border-end border-secondary">
+                <p class="text-muted mb-1 form-label">PURCHASED ON</p>
+                <h5 class="text-white font-monospace">@(Model.PurchaseDate?.ToString("MM/dd/yyyy") ?? "N/A")</h5>
+            </div>
+            <div class="col-6">
+                <p class="text-muted mb-1 form-label">STATUS</p>
+                <span class="badge @badgeClass border border-secondary text-white fs-6" style="letter-spacing: 1px;">@displayStatus</span>
+            </div>
+        </div>
     </div>
 </div>

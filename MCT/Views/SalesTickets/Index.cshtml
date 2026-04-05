@@ -1,0 +1,48 @@
+﻿@model IEnumerable<MCT.Models.Tournament>
+@{
+    ViewData["Title"] = "SALES ANALYTICS";
+}
+
+<div class="page-container mx-auto" style="max-width: 1200px;">
+    <div class="d-flex justify-content-between align-items-end border-bottom border-secondary mb-4 pb-2">
+        <h3 class="text-val-red m-0">TICKET SALES ANALYTICS</h3>
+    </div>
+
+    <div class="val-card p-4">
+        <table class="table table-dark table-borderless align-middle mb-0">
+            <thead class="border-bottom border-secondary text-muted">
+                <tr>
+                    <th class="fw-normal" style="letter-spacing: 1px;">NAME</th>
+                    <th class="fw-normal" style="letter-spacing: 1px;">LOCATION</th>
+                    <th class="fw-normal text-center" style="letter-spacing: 1px;">SALE DATES</th>
+                    <th class="fw-normal text-center" style="letter-spacing: 1px;">SOLD</th>
+                    <th class="fw-normal text-center" style="letter-spacing: 1px;">TOTAL PLACES</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var startDate = item.StartDate ?? DateTime.UtcNow.Date;
+                    var endDate = item.EndDate ?? DateTime.UtcNow.Date;
+                    var salesStart = startDate.AddMonths(-1);
+                    
+                    int soldCount = item.Tickets?.Count(t => t.Status != "Canceled") ?? 0;
+
+                    <tr class="border-bottom border-secondary" style="height: 60px;">
+                        <td class="text-white fw-bold fs-5">@item.Description</td>
+                        <td>@item.Location</td>
+                        <td class="text-center font-monospace text-muted" style="font-size: 0.95rem;">
+                            @(salesStart.ToString("MM/dd/yyyy")) - @(endDate.ToString("MM/dd/yyyy"))
+                        </td>
+                        <td class="text-center text-val-orange fw-bold fs-4 font-monospace">@soldCount</td>
+                        <td class="text-center text-white fs-5 font-monospace">@item.Places</td>
+                        <td class="text-end">
+                            <a asp-action="Details" asp-route-id="@item.TournamentId" class="btn btn-outline-val btn-action-sm">VIEW CHART</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

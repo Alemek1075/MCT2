@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -19,121 +20,129 @@ namespace MCT.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var mctContext = _context.Tickets.Include(t => t.Tournament).Include(t => t.User);
+            var mctContext = _context.Tickets.Include(t => t.StatusNavigation).Include(t => t.Tournament).Include(t => t.User);
             return View(await mctContext.ToListAsync());
         }
 
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
-
             var ticket = await _context.Tickets
-                .Include(t => t.Tournament)
-                .Include(t => t.User)
+                .Include(t => t.StatusNavigation).Include(t => t.Tournament).Include(t => t.User)
                 .FirstOrDefaultAsync(m => m.TicketId == id);
-
             if (ticket == null) return NotFound();
-
             return View(ticket);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "Description");
             ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username");
-
-            var statuses = new System.Collections.Generic.List<SelectListItem> {
-                new SelectListItem { Value = "Active", Text = "Active" },
-                new SelectListItem { Value = "Used", Text = "Used" },
-                new SelectListItem { Value = "Canceled", Text = "Canceled" }
-            };
-            ViewData["Status"] = new SelectList(statuses, "Value", "Text");
-
-            var newTicket = new Ticket { QrCode = GenerateUniqueQrCode() };
-            return View(newTicket);
+            ViewBag.TournamentsList = await _context.Tournaments.ToListAsync();
+            return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TicketId,UserId,TournamentId,PurchaseDate,Status,QrCode")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("TicketId,TournamentId,UserId")] Ticket ticket)
         {
-            if (ModelState.IsValid)
+            ModelState.Remove("Status");
+            ModelState.Remove("PurchaseDate");
+            ModelState.Remove("Tournament");
+            ModelState.Remove("User");
+            ModelState.Remove("Payments");
+            ModelState.Remove("StatusNavigation");
+
+            var tournament = await _context.Tournaments.Include(t => t.Tickets).FirstOrDefaultAsync(t => t.TournamentId == ticket.TournamentId);
+
+            if (tournament != null)
             {
-                if (ticket.PurchaseDate.HasValue)
+                var today = DateTime.UtcNow.Date;
+                var startDate = tournament.StartDate?.Date ?? today;
+                var endDate = tournament.EndDate?.Date ?? today;
+                var availableFrom = startDate.AddMonths(-1);
+
+                if (today < availableFrom || today > endDate)
                 {
-                    ticket.PurchaseDate = DateTime.SpecifyKind(ticket.PurchaseDate.Value, DateTimeKind.Utc);
+                    ModelState.AddModelError("TournamentId", $"Tickets are only available between {availableFrom:MM/dd/yyyy} and {endDate:MM/dd/yyyy}.");
                 }
 
+                int activeTickets = tournament.Tickets.Count(t => t.Status != "Canceled");
+
+                if (tournament.Places <= 0 || activeTickets >= tournament.Places)
+                {
+                    ModelState.AddModelError("TournamentId", "This event is completely sold out! No seats left.");
+                }
+            }
+
+            ticket.PurchaseDate = DateTime.UtcNow.Date;
+            ticket.Status = "Valid";
+
+            if (ModelState.IsValid)
+            {
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "Description", ticket.TournamentId);
             ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username", ticket.UserId);
+            ViewBag.TournamentsList = await _context.Tournaments.ToListAsync();
             return View(ticket);
         }
 
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
-
-            var ticket = await _context.Tickets.FindAsync(id);
+            var ticket = await _context.Tickets.Include(t => t.Tournament).FirstOrDefaultAsync(t => t.TicketId == id);
             if (ticket == null) return NotFound();
 
-            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "Description", ticket.TournamentId);
             ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username", ticket.UserId);
-
-            var statuses = new System.Collections.Generic.List<SelectListItem> {
-                new SelectListItem { Value = "Active", Text = "Active" },
-                new SelectListItem { Value = "Used", Text = "Used" },
-                new SelectListItem { Value = "Canceled", Text = "Canceled" }
-            };
-            ViewData["Status"] = new SelectList(statuses, "Value", "Text", ticket.Status);
-
             return View(ticket);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("TicketId,UserId,TournamentId,PurchaseDate,Status,QrCode")] Ticket ticket)
+        public async Task<IActionResult> Edit(int id, int UserId, bool IsCanceled)
         {
-            if (id != ticket.TicketId) return NotFound();
+            var ticket = await _context.Tickets
+                .Include(t => t.Tournament)
+                .ThenInclude(tour => tour.Tickets)
+                .FirstOrDefaultAsync(t => t.TicketId == id);
 
-            if (ModelState.IsValid)
+            if (ticket == null) return NotFound();
+
+            string newStatus = IsCanceled ? "Canceled" : "Valid";
+
+            if (ticket.Status == "Canceled" && newStatus == "Valid")
             {
-                try
+                int activeTickets = ticket.Tournament.Tickets.Count(t => t.Status != "Canceled");
+                if (activeTickets >= ticket.Tournament.Places)
                 {
-                    if (ticket.PurchaseDate.HasValue)
-                    {
-                        ticket.PurchaseDate = DateTime.SpecifyKind(ticket.PurchaseDate.Value, DateTimeKind.Utc);
-                    }
-
-                    _context.Update(ticket);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError("", "Cannot restore ticket: The event is completely sold out!");
+                    ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username", UserId);
+                    return View(ticket);
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TicketExists(ticket.TicketId)) return NotFound();
-                    else throw;
-                }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["TournamentId"] = new SelectList(_context.Tournaments, "TournamentId", "Description", ticket.TournamentId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Username", ticket.UserId);
-            return View(ticket);
+
+            ticket.UserId = UserId;
+            ticket.Status = newStatus;
+
+            try
+            {
+                _context.Update(ticket);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException) { throw; }
+
+            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
-
-            var ticket = await _context.Tickets
-                .Include(t => t.Tournament)
-                .Include(t => t.User)
-                .FirstOrDefaultAsync(m => m.TicketId == id);
-
+            var ticket = await _context.Tickets.Include(t => t.Tournament).Include(t => t.User).FirstOrDefaultAsync(m => m.TicketId == id);
             if (ticket == null) return NotFound();
-
             return View(ticket);
         }
 
@@ -145,34 +154,9 @@ namespace MCT.Controllers
             if (ticket != null)
             {
                 _context.Tickets.Remove(ticket);
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool TicketExists(int id)
-        {
-            return _context.Tickets.Any(e => e.TicketId == id);
-        }
-
-        private string GenerateUniqueQrCode()
-        {
-            var random = new Random();
-            string newQrCode;
-            bool exists;
-            do
-            {
-                char[] digits = new char[16];
-                for (int i = 0; i < 16; i++)
-                {
-                    digits[i] = (char)('0' + random.Next(0, 10));
-                }
-                newQrCode = new string(digits);
-                exists = _context.Tickets.Any(t => t.QrCode == newQrCode);
-            } while (exists);
-
-            return newQrCode;
         }
     }
 }

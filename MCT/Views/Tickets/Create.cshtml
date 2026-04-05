@@ -1,43 +1,54 @@
 ﻿@model MCT.Models.Ticket
 @{
-    ViewData["Title"] = "CREATE TICKET";
+    ViewData["Title"] = "ISSUE TICKET";
 }
 
-<div class="page-container mx-auto" style="max-width: 600px;">
-    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">CREATE NEW TICKET</h3>
+<div class="page-container mx-auto" style="max-width: 500px;">
+    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">ISSUE NEW TICKET</h3>
 
     <form asp-action="Create">
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold bg-dark p-2 border border-danger" style="border-radius: 4px;"></div>
 
-        <div class="mb-3">
-            <label asp-for="UserId" class="form-label">USER</label>
-            <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId"></select>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="TournamentId" class="form-label">EVENT</label>
-            <select asp-for="TournamentId" class="form-select" asp-items="ViewBag.TournamentId"></select>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="PurchaseDate" class="form-label">PURCHASE DATE</label>
-            <input asp-for="PurchaseDate" class="form-control" type="datetime-local" />
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="Status" class="form-label">STATUS</label>
-            <select asp-for="Status" class="form-select" asp-items="ViewBag.Status"></select>
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-end mb-1">
+                <label asp-for="TournamentId" class="form-label m-0">EVENT</label>
+                <span class="text-muted font-monospace" style="font-size: 0.85rem;">PRICE: <span id="VisualPrice" class="text-val-orange fw-bold fs-6">$0</span></span>
+            </div>
+            <select asp-for="TournamentId" id="TournamentSelect" class="form-select" asp-items="ViewBag.TournamentId"></select>
+            <span asp-validation-for="TournamentId" class="text-danger"></span>
         </div>
 
         <div class="mb-4">
-            <label asp-for="QrCode" class="form-label">QR CODE (16 DIGITS)</label>
-            <input asp-for="QrCode" class="form-control font-monospace" type="text" pattern="\d{16}" minlength="16" maxlength="16" title="Exactly 16 digits required" />
-            <span asp-validation-for="QrCode" class="text-danger"></span>
+            <label asp-for="UserId" class="form-label">OWNER (USER)</label>
+            <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId"></select>
         </div>
 
-        <div class="row pt-3">
-            <div class="col-6"><button type="submit" class="btn btn-primary w-100">CREATE TICKET</button></div>
-            <div class="col-6"><a asp-action="Index" class="btn-outline-val w-100">CANCEL</a></div>
+        <div class="d-flex justify-content-end gap-3 pt-3 border-top border-secondary">
+            <a asp-action="Index" class="btn-outline-val">CANCEL</a>
+            <button type="submit" class="btn btn-primary">ISSUE TICKET</button>
         </div>
     </form>
 </div>
+
+@section Scripts {
+    <script>
+        const tournamentPrices = {
+            @foreach (var t in ViewBag.TournamentsList)
+            {
+                    decimal price = t.Places > 0 ? (t.Price ?? 0) / t.Places : 0;
+                    <text>@t.TournamentId : @Math.Floor(price),</text>
+            }
+        };
+
+        const select = document.getElementById('TournamentSelect');
+        const priceLabel = document.getElementById('VisualPrice');
+
+        function updatePrice() {
+            const id = select.value;
+            priceLabel.textContent = '$' + (tournamentPrices[id] || 0);
+        }
+
+        select.addEventListener('change', updatePrice);
+        updatePrice();
+    </script>
+}

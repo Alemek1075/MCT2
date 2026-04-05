@@ -19,7 +19,6 @@ public partial class Ticket
     }
 
     [Required] public string? Status { get; set; }
-    public string? QrCode { get; set; }
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
     public virtual TicketStatus? StatusNavigation { get; set; }

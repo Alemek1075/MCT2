@@ -1,65 +1,77 @@
 ﻿@model MCT.Models.Tournament
-
 @{
-    ViewData["Title"] = "Create Tournament";
+    ViewData["Title"] = "CREATE EVENT";
 }
 
-<h1>Create Tournament</h1>
-<hr />
-<div class="row">
-    <div class="col-md-5">
-        <form asp-action="Create" id="tournamentForm">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="Description" class="control-label">Name</label>
-                <input asp-for="Description" class="form-control" required />
-            </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="Location" class="control-label">Location</label>
-                <input asp-for="Location" class="form-control" required />
-            </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="Price" class="control-label">Prize Pool</label>
-                <input asp-for="Price" type="number" step="0.01" class="form-control" required />
-            </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="Places" class="control-label">Spectator Seats (Total Places)</label>
-                <input asp-for="Places" type="number" min="0" class="form-control" required />
-                <span asp-validation-for="Places" class="text-danger"></span>
-            </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="StartDate" class="control-label">Start Date</label>
-                <input asp-for="StartDate" type="date" class="form-control" required />
-            </div>
+<div class="page-container mx-auto" style="max-width: 800px;">
+    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">CREATE NEW EVENT</h3>
 
-            <div class="form-group mb-3">
-                <label class="control-label fw-bold">Participating Teams</label>
-                <small class="d-block text-muted mb-2">Search and click to add teams. You must select exactly 2, 4, or 8 teams.</small>
-                
-                <div class="position-relative">
-                    <input type="text" id="teamSearchInput" class="form-control" placeholder="Type team name..." autocomplete="off" />
-                    <ul id="teamSearchResults" class="list-group position-absolute w-100 shadow-sm" style="z-index: 1000; display: none; max-height: 200px; overflow-y: auto;">
-                    </ul>
+    <form asp-action="Create" id="tournamentForm">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold bg-dark p-2 border border-danger" style="border-radius: 4px;"></div>
+
+        <div class="val-card p-4 mb-4">
+            <h5 class="text-val-orange mb-4 border-bottom border-secondary pb-2" style="font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 1px;">GENERAL INFO</h5>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Description" class="form-label">EVENT NAME</label>
+                    <input asp-for="Description" class="form-control" required />
+                    <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
-
-                <div id="selectedTeamsBox" class="mt-3 d-flex flex-wrap gap-2">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Location" class="form-label">LOCATION</label>
+                    <input asp-for="Location" class="form-control" required />
+                    <span asp-validation-for="Location" class="text-danger"></span>
                 </div>
-                
-                <div id="hiddenInputs"></div>
-                <span asp-validation-for="SelectedTeamIds" class="text-danger d-block mt-2"></span>
             </div>
 
-            <div class="form-group mt-4">
-                <input type="submit" value="Create" class="btn btn-success" />
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="StartDate" class="form-label">START DATE</label>
+                    <input asp-for="StartDate" type="date" class="form-control" required />
+                    <span class="text-muted d-block mt-1" style="font-size: 0.75rem;">End date auto-calculated based on teams.</span>
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Places" class="form-label">SPECTATOR SEATS</label>
+                    <input asp-for="Places" type="number" min="0" class="form-control" required />
+                    <span asp-validation-for="Places" class="text-danger"></span>
+                </div>
             </div>
-        </form>
-    </div>
+
+            <div class="mb-2">
+                <label asp-for="Price" class="form-label">PRIZE POOL</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-val-orange fw-bold">$</span>
+                    <input asp-for="Price" type="number" step="1" min="0" class="form-control" required onkeydown="return event.key !== '.' && event.key !== ','" />
+                </div>
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="val-card p-4 mb-4">
+            <h5 class="text-val-orange mb-3 border-bottom border-secondary pb-2" style="font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 1px;">PARTICIPATING TEAMS</h5>
+            <label class="form-label text-muted text-transform-none mb-3" style="font-size: 0.85rem;">Search and click to add teams. You must select exactly 2, 4, or 8 teams.</label>
+            
+            <div class="position-relative mb-3">
+                <input type="text" id="teamSearchInput" class="form-control border-secondary" style="background-color: #111;" placeholder="Type team name..." autocomplete="off" />
+                <ul id="teamSearchResults" class="list-group position-absolute w-100 shadow-lg" style="z-index: 1000; display: none; max-height: 200px; overflow-y: auto; background-color: #1f2326; border: 1px solid #555;">
+                </ul>
+            </div>
+
+            <div id="selectedTeamsBox" class="mt-3 d-flex flex-wrap gap-2 p-3 border border-secondary" style="min-height: 70px; border-radius: 4px; background-color: #111;">
+                <span class="text-muted w-100 text-center mt-1" id="emptyTeamsText" style="font-size: 0.9rem;">No teams selected yet...</span>
+            </div>
+            
+            <div id="hiddenInputs"></div>
+            <span asp-validation-for="SelectedTeamIds" class="text-danger d-block mt-2 fw-bold"></span>
+        </div>
+
+        <div class="d-flex justify-content-end gap-3 pt-3 border-top border-secondary">
+            <a asp-action="Index" class="btn-outline-val">CANCEL</a>
+            <button type="submit" class="btn btn-primary">CREATE EVENT</button>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
@@ -91,9 +103,10 @@
         const searchResults = document.getElementById('teamSearchResults');
         const selectedBox = document.getElementById('selectedTeamsBox');
         const hiddenInputs = document.getElementById('hiddenInputs');
+        const emptyText = document.getElementById('emptyTeamsText');
 
         document.addEventListener("DOMContentLoaded", () => {
-            if (selectedTeamIds.length > 0) renderSelected();
+            renderSelected();
         });
 
         searchInput.addEventListener('input', function() {
@@ -111,9 +124,15 @@
                 searchResults.style.display = 'block';
                 filtered.forEach(t => {
                     const li = document.createElement('li');
-                    li.className = 'list-group-item list-group-item-action';
+                    li.className = 'list-group-item text-white border-secondary';
+                    li.style.backgroundColor = '#1f2326';
                     li.style.cursor = 'pointer';
+                    li.style.transition = '0.2s';
                     li.textContent = t.name;
+                    
+                    li.onmouseover = function() { this.style.backgroundColor = '#ff4655'; };
+                    li.onmouseout = function() { this.style.backgroundColor = '#1f2326'; };
+                    
                     li.onclick = () => addTeam(t.id);
                     searchResults.appendChild(li);
                 });
@@ -138,7 +157,7 @@
             searchInput.focus();
         }
 
-        function removeTeam(id) {
+        window.removeTeam = function(id) {
             selectedTeamIds = selectedTeamIds.filter(tId => tId !== id);
             renderSelected();
         }
@@ -147,17 +166,22 @@
             selectedBox.innerHTML = '';
             hiddenInputs.innerHTML = '';
             
+            if (selectedTeamIds.length === 0) {
+                if(emptyText) selectedBox.appendChild(emptyText);
+                emptyText.style.display = 'block';
+                return;
+            }
+
             selectedTeamIds.forEach(id => {
                 const team = allTeams.find(t => t.id === id);
                 if(!team) return;
                 
-                // Візуальний бейдж
                 const badge = document.createElement('span');
-                badge.className = 'badge bg-primary d-flex align-items-center p-2 fs-6';
-                badge.innerHTML = `${team.name} <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;" onclick="removeTeam(${id})"></button>`;
+                badge.className = 'badge d-flex align-items-center px-3 py-2 fs-6';
+                badge.style.backgroundColor = '#ff4655';
+                badge.innerHTML = `${team.name} <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.6rem;" onclick="removeTeam(${id})"></button>`;
                 selectedBox.appendChild(badge);
 
-                // Прихований інпут для відправки на сервер
                 const hidden = document.createElement('input');
                 hidden.type = 'hidden';
                 hidden.name = 'SelectedTeamIds';
