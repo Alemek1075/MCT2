@@ -48,7 +48,6 @@ namespace MCT.Controllers
         {
             if (ModelState.IsValid)
             {
-                team.MemberCount = 0;
                 _context.Add(team);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -84,7 +83,6 @@ namespace MCT.Controllers
                     existingTeam.Name = team.Name;
                     existingTeam.ShortCode = team.ShortCode;
                     existingTeam.Region = team.Region;
-                    existingTeam.MemberCount = existingTeam.Players.Count;
 
                     _context.Update(existingTeam);
                     await _context.SaveChangesAsync();

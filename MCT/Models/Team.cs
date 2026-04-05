@@ -18,8 +18,6 @@ public partial class Team
     [Required(ErrorMessage = "Поле Регіон є обов'язковим.")]
     public string? Region { get; set; }
 
-    public int? MemberCount { get; set; }
-
     public virtual ICollection<Match> MatchTeamAs { get; set; } = new List<Match>();
 
     public virtual ICollection<Match> MatchTeamBs { get; set; } = new List<Match>();

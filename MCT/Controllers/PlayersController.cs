@@ -55,11 +55,6 @@ namespace MCT.Controllers
                     .Include(t => t.Players)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(t => t.TeamId == player.TeamId);
-
-                if (team != null && team.MemberCount.HasValue && team.Players.Count >= team.MemberCount.Value)
-                {
-                    ModelState.AddModelError("TeamId", $"This team already has the maximum number of players ({team.MemberCount.Value}).");
-                }
             }
 
             if (ModelState.IsValid)
@@ -99,11 +94,6 @@ namespace MCT.Controllers
                     .FirstOrDefaultAsync(t => t.TeamId == player.TeamId);
 
                 var currentPlayersCount = team?.Players.Count(p => p.PlayerId != player.PlayerId) ?? 0;
-
-                if (team != null && team.MemberCount.HasValue && currentPlayersCount >= team.MemberCount.Value)
-                {
-                    ModelState.AddModelError("TeamId", $"This team already has the maximum number of players ({team.MemberCount.Value}).");
-                }
             }
 
             if (ModelState.IsValid)

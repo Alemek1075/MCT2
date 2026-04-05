@@ -27,6 +27,10 @@ public partial class Tournament : IValidatableObject
     }
 
     [Required][Range(0, 1000000000)] public decimal? Price { get; set; }
+
+    [Required][Range(0, 1000000000)] public decimal? Sits { get; set; }
+//
+
     [Required] public string? Status { get; set; }
 
     public virtual ICollection<Match> Matches { get; set; } = new List<Match>();
