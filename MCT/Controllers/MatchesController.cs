@@ -12,12 +12,23 @@ namespace MCT.Controllers
     public class MatchesController : Controller
     {
         private readonly MctContext _context;
-        public MatchesController(MctContext context) { _context = context; }
 
-        public async Task<IActionResult> Index() { return View(await _context.Matches.Include(m => m.Tournament).Include(m => m.TeamA).Include(m => m.TeamB).ToListAsync()); }
-        public async Task<IActionResult> Details(int? id) { if (id == null) return NotFound(); return View(await _context.Matches.Include(m => m.Tournament).Include(m => m.TeamA).Include(m => m.TeamB).FirstOrDefaultAsync(m => m.MatchId == id)); }
+        public MatchesController(MctContext context)
+        {
+            _context = context;
+        }
 
-        // --- СТВОРЕННЯ МАТЧУ РУКАМИ ---
+        public async Task<IActionResult> Index()
+        {
+            return View(await _context.Matches.Include(m => m.Tournament).Include(m => m.TeamA).Include(m => m.TeamB).ToListAsync());
+        }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+            return View(await _context.Matches.Include(m => m.Tournament).Include(m => m.TeamA).Include(m => m.TeamB).FirstOrDefaultAsync(m => m.MatchId == id));
+        }
+
         public IActionResult Create()
         {
             ViewBag.TournamentId = new SelectList(_context.Tournaments, "TournamentId", "Description");
@@ -52,7 +63,6 @@ namespace MCT.Controllers
             return View(match);
         }
 
-        // --- РЕДАГУВАННЯ ТА ЛОГІКА СІТКИ ---
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -66,7 +76,12 @@ namespace MCT.Controllers
             var match = await _context.Matches.Include(m => m.TeamA).Include(m => m.TeamB).FirstOrDefaultAsync(m => m.MatchId == id);
             if (match == null) return NotFound();
 
-            int? previousWinnerId = match.WinnerId;
+            if (match.TeamAId == null || match.TeamBId == null)
+            {
+                TempData["ErrorMessage"] = "Cannot update score: Both teams must be determined to play this match.";
+                return RedirectToAction(nameof(Index));
+            }
+
             match.ScoreA = matchForm.ScoreA;
             match.ScoreB = matchForm.ScoreB;
 
@@ -74,87 +89,65 @@ namespace MCT.Controllers
             else if (match.ScoreB > match.ScoreA) match.WinnerId = match.TeamBId;
             else match.WinnerId = null;
 
-            // ФІКС: Обриваємо наступні матчі тільки якщо рахунок змінився/збросився
-            if (previousWinnerId != null && match.WinnerId != previousWinnerId)
-            {
-                await DeleteFutureMatches(match.TournamentId, previousWinnerId, match.ScheduledAt);
-            }
-
             try
             {
                 _context.Update(match);
                 await _context.SaveChangesAsync();
 
-                if (match.WinnerId != null) await CheckAndGenerateNextRound(match.TournamentId);
+                await RecalculateBracket(match.TournamentId);
             }
             catch (DbUpdateConcurrencyException) { throw; }
 
             return RedirectToAction(nameof(Index));
         }
 
-        // ФІКС: Шукаємо тільки матчі, які по графіку ПІЗНІШЕ (m.ScheduledAt > afterDate), щоб уникнути нескінченного циклу!
-        private async Task DeleteFutureMatches(int? tournamentId, int? teamId, DateTime? afterDate)
-        {
-            if (tournamentId == null || teamId == null || afterDate == null) return;
-
-            var futureMatches = await _context.Matches
-                .Where(m => m.TournamentId == tournamentId &&
-                            (m.TeamAId == teamId || m.TeamBId == teamId) &&
-                            m.ScheduledAt > afterDate)
-                .ToListAsync();
-
-            foreach (var fMatch in futureMatches)
-            {
-                int? nextWinnerId = fMatch.WinnerId;
-                DateTime? nextDate = fMatch.ScheduledAt;
-
-                var stats = await _context.Stats.Where(s => s.MatchId == fMatch.MatchId).ToListAsync();
-                _context.Stats.RemoveRange(stats);
-                _context.Matches.Remove(fMatch);
-
-                if (nextWinnerId != null) await DeleteFutureMatches(tournamentId, nextWinnerId, nextDate);
-            }
-        }
-
-        private async Task CheckAndGenerateNextRound(int? tournamentId)
+        private async Task RecalculateBracket(int? tournamentId)
         {
             if (tournamentId == null) return;
-            var allMatches = await _context.Matches.Where(m => m.TournamentId == tournamentId).OrderBy(m => m.ScheduledAt).ToListAsync();
-            if (!allMatches.Any()) return;
 
-            var currentRoundDate = allMatches.Max(m => m.ScheduledAt.Value.Date);
-            var currentRoundMatches = allMatches.Where(m => m.ScheduledAt.Value.Date == currentRoundDate).ToList();
+            var allMatches = await _context.Matches
+                .Where(m => m.TournamentId == tournamentId)
+                .OrderBy(m => m.ScheduledAt)
+                .ThenBy(m => m.MatchId)
+                .ToListAsync();
 
-            if (currentRoundMatches.Count <= 1) return; // Це фінал
+            var rounds = allMatches.GroupBy(m => m.ScheduledAt.Value.Date).OrderBy(g => g.Key).ToList();
 
-            if (currentRoundMatches.All(m => m.WinnerId != null))
+            for (int r = 0; r < rounds.Count - 1; r++)
             {
-                var winners = currentRoundMatches.OrderBy(m => m.ScheduledAt).Select(m => m.WinnerId.Value).ToList();
-                DateTime nextMatchTime = currentRoundDate.AddDays(1).AddHours(10);
+                var currentRound = rounds[r].ToList();
+                var nextRound = rounds[r + 1].ToList();
 
-                for (int i = 0; i < winners.Count; i += 2)
+                for (int i = 0; i < currentRound.Count; i++)
                 {
-                    if (i + 1 < winners.Count)
+                    int nextMatchIndex = i / 2;
+                    bool isTeamA = i % 2 == 0;
+
+                    if (nextMatchIndex < nextRound.Count)
                     {
-                        bool exists = await _context.Matches.AnyAsync(m => m.TournamentId == tournamentId && m.TeamAId == winners[i] && m.TeamBId == winners[i + 1]);
-                        if (!exists)
+                        var nextMatch = nextRound[nextMatchIndex];
+                        int? currentWinner = currentRound[i].WinnerId;
+
+                        int? targetTeamId = isTeamA ? nextMatch.TeamAId : nextMatch.TeamBId;
+
+                        if (targetTeamId != currentWinner)
                         {
-                            _context.Matches.Add(new Match
-                            {
-                                TournamentId = tournamentId,
-                                TeamAId = winners[i],
-                                TeamBId = winners[i + 1],
-                                ScoreA = 0,
-                                ScoreB = 0,
-                                ScheduledAt = nextMatchTime,
-                                MatchType = "Auto"
-                            });
+                            if (isTeamA) nextMatch.TeamAId = currentWinner;
+                            else nextMatch.TeamBId = currentWinner;
+
+                            nextMatch.ScoreA = 0;
+                            nextMatch.ScoreB = 0;
+                            nextMatch.WinnerId = null;
+
+                            var stats = await _context.Stats.Where(s => s.MatchId == nextMatch.MatchId).ToListAsync();
+                            if (stats.Any()) _context.Stats.RemoveRange(stats);
+
+                            _context.Update(nextMatch);
                         }
-                        nextMatchTime = nextMatchTime.AddHours(2);
                     }
                 }
-                await _context.SaveChangesAsync();
             }
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IActionResult> Delete(int? id)

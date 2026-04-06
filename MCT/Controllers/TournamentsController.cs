@@ -97,21 +97,38 @@ namespace MCT.Controllers
 
             var rng = new Random();
             var shuffledTeams = tournament.SelectedTeamIds.OrderBy(x => rng.Next()).ToList();
-            DateTime currentMatchTime = tournament.StartDate.Value.Date.AddHours(10);
 
-            for (int i = 0; i < shuffledTeams.Count; i += 2)
+            int totalRounds = (int)Math.Log2(teamCount);
+            int currentRoundMatchesCount = teamCount / 2;
+            DateTime roundDate = tournament.StartDate.Value.Date;
+
+            for (int r = 1; r <= totalRounds; r++)
             {
-                _context.Matches.Add(new Match
+                DateTime currentMatchTime = roundDate.AddHours(10);
+
+                for (int m = 0; m < currentRoundMatchesCount; m++)
                 {
-                    TournamentId = tournament.TournamentId,
-                    TeamAId = shuffledTeams[i],
-                    TeamBId = shuffledTeams[i + 1],
-                    ScoreA = 0,
-                    ScoreB = 0,
-                    ScheduledAt = currentMatchTime,
-                    MatchType = "Auto"
-                });
-                currentMatchTime = currentMatchTime.AddHours(2);
+                    var newMatch = new Match
+                    {
+                        TournamentId = tournament.TournamentId,
+                        ScoreA = 0,
+                        ScoreB = 0,
+                        ScheduledAt = currentMatchTime,
+                        MatchType = "Auto"
+                    };
+
+                    if (r == 1)
+                    {
+                        newMatch.TeamAId = shuffledTeams[m * 2];
+                        newMatch.TeamBId = shuffledTeams[m * 2 + 1];
+                    }
+
+                    _context.Matches.Add(newMatch);
+                    currentMatchTime = currentMatchTime.AddHours(2);
+                }
+
+                currentRoundMatchesCount /= 2;
+                roundDate = roundDate.AddDays(1);
             }
 
             await _context.SaveChangesAsync();

@@ -1,36 +1,51 @@
 ﻿@model MCT.Models.Match
 @{
-    ViewData["Title"] = "ENTER SCORE";
+    ViewData["Title"] = "UPDATE SCORE";
 }
 
-<div class="page-container mx-auto" style="max-width: 550px;">
-    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">ENTER MATCH SCORE</h3>
+<div class="page-container mx-auto" style="max-width: 600px;">
+    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">UPDATE MATCH SCORE</h3>
+
+    @if (Model.TeamAId == null || Model.TeamBId == null)
+    {
+        <div class="alert bg-val-dark-red text-white font-monospace border border-danger p-3 mb-4 text-center">
+            [ACCESS_DENIED] TEAMS ARE NOT YET DETERMINED. WAITING FOR PREVIOUS ROUNDS TO FINISH.
+        </div>
+    }
 
     <form asp-action="Edit">
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
         <input type="hidden" asp-for="MatchId" />
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold bg-dark p-2 border border-danger rounded"></div>
 
-        <div class="p-4 mb-4 val-card" style="background-color: #111111;">
-            <p class="text-center text-muted mb-4 form-label">@(Model.Tournament?.Description ?? "EVENT MATCH")</p>
+        <div class="val-card p-5 text-center mb-4">
+            <p class="text-muted mb-1 form-label">TOURNAMENT</p>
+            <h4 class="text-white mb-4">@(Model.Tournament?.Description ?? "TBD")</h4>
             
-            <div class="row align-items-center text-center">
-                <div class="col-5">
-                    <label class="form-label text-white fs-5">@(Model.TeamA?.ShortCode ?? Model.TeamA?.Name ?? "TBD")</label>
-                    <input asp-for="ScoreA" type="number" min="0" class="form-control text-center fs-3 text-val-orange font-monospace mt-2" required />
+            <div class="d-flex justify-content-center align-items-center gap-4 mt-5">
+                <div class="text-end" style="flex: 1;">
+                    <h2 class="text-white m-0 mb-3" style="font-size: 2.5rem;">@(Model.TeamA?.ShortCode ?? "TBD")</h2>
+                    <input asp-for="ScoreA" class="form-control text-center fs-2 fw-bold" style="height: 60px;"
+                           disabled="@(Model.TeamAId == null || Model.TeamBId == null ? "disabled" : null)" />
                 </div>
-                <div class="col-2 d-flex justify-content-center align-items-center mt-4">
-                    <span class="text-muted fs-4 fw-bold">-</span>
+                
+                <div class="px-3">
+                    <h3 class="text-secondary m-0">VS</h3>
                 </div>
-                <div class="col-5">
-                    <label class="form-label text-white fs-5">@(Model.TeamB?.ShortCode ?? Model.TeamB?.Name ?? "TBD")</label>
-                    <input asp-for="ScoreB" type="number" min="0" class="form-control text-center fs-3 text-val-orange font-monospace mt-2" required />
+                
+                <div class="text-start" style="flex: 1;">
+                    <h2 class="text-white m-0 mb-3" style="font-size: 2.5rem;">@(Model.TeamB?.ShortCode ?? "TBD")</h2>
+                    <input asp-for="ScoreB" class="form-control text-center fs-2 fw-bold" style="height: 60px;"
+                           disabled="@(Model.TeamAId == null || Model.TeamBId == null ? "disabled" : null)" />
                 </div>
             </div>
         </div>
 
         <div class="d-flex justify-content-end gap-3 pt-3 border-top border-secondary">
             <a asp-action="Index" class="btn-outline-val">CANCEL</a>
-            <button type="submit" class="btn btn-primary">SAVE SCORE</button>
+            <button type="submit" class="btn btn-primary"
+                    disabled="@(Model.TeamAId == null || Model.TeamBId == null ? "disabled" : null)">
+                SAVE SCORE
+            </button>
         </div>
     </form>
 </div>
