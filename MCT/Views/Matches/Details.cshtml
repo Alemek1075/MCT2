@@ -3,41 +3,37 @@
     ViewData["Title"] = "MATCH DETAILS";
 }
 
-<div class="page-container mx-auto" style="max-width: 600px;">
+<div class="page-container mx-auto" style="max-width: 800px;">
     <div class="d-flex justify-content-between align-items-end border-bottom border-secondary mb-4 pb-2">
-        <h3 class="text-val-red m-0">MATCH DETAILS</h3>
+        <h3 class="text-val-red m-0">MATCH OVERVIEW</h3>
         <div class="d-flex gap-2">
-            <a asp-action="Edit" asp-route-id="@Model?.MatchId" class="btn btn-primary btn-action-sm">ENTER SCORE</a>
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Edit" asp-route-id="@Model?.MatchId" class="btn btn-primary btn-action-sm">UPDATE SCORE</a>
+            }
             <a asp-action="Index" class="btn-outline-val btn-action-sm">BACK</a>
         </div>
     </div>
 
     <div class="val-card p-5 text-center">
-        <p class="text-muted mb-1 form-label">TOURNAMENT</p>
-        <h4 class="text-white mb-4">@(Model.Tournament?.Description ?? "TBD")</h4>
+        <p class="text-muted mb-1 form-label">EVENT</p>
+        <h4 class="text-white mb-2">@(Model.Tournament?.Description ?? "TBD")</h4>
+        <p class="text-muted font-monospace mb-5">@(Model.ScheduledAt?.ToString("MM/dd/yyyy HH:mm") ?? "TBA")</p>
         
-        <p class="text-muted mb-1 form-label">SCHEDULED AT</p>
-        <h5 class="text-white mb-4">@(Model.ScheduledAt?.ToString("MM/dd/yyyy HH:mm") ?? "TBD")</h5>
-        
-        <div class="d-flex justify-content-center align-items-center gap-4 my-5">
+        <div class="d-flex justify-content-center align-items-center gap-5 mt-4">
             <div class="text-end" style="flex: 1;">
-                <h2 class="text-white m-0" style="font-size: 3.5rem;">@(Model.TeamA?.ShortCode ?? "TBD")</h2>
+                <h1 class="text-white m-0" style="font-size: 3.5rem;">@(Model.TeamA?.ShortCode ?? "TBD")</h1>
             </div>
-            <div class="px-4 border-start border-end border-secondary" style="min-width: 140px;">
-                <h1 class="text-val-red m-0" style="font-size: 4.5rem;">
-                    @(Model.ScoreA ?? 0) <span class="text-muted fs-3">-</span> @(Model.ScoreB ?? 0)
+            
+            <div class="px-4">
+                <h1 class="text-val-red m-0" style="font-family: 'Bebas Neue', sans-serif; font-size: 5rem; letter-spacing: 2px;">
+                    @(Model.ScoreA ?? 0) <span class="text-secondary">-</span> @(Model.ScoreB ?? 0)
                 </h1>
             </div>
+            
             <div class="text-start" style="flex: 1;">
-                <h2 class="text-white m-0" style="font-size: 3.5rem;">@(Model.TeamB?.ShortCode ?? "TBD")</h2>
+                <h1 class="text-white m-0" style="font-size: 3.5rem;">@(Model.TeamB?.ShortCode ?? "TBD")</h1>
             </div>
         </div>
-        
-        @if (Model.Winner != null)
-        {
-            <div class="mt-4 pt-4 border-top border-secondary">
-                <span class="badge bg-success px-4 py-2 fs-5">WINNER: @Model.Winner.ShortCode</span>
-            </div>
-        }
     </div>
 </div>

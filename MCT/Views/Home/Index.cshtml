@@ -97,7 +97,9 @@
                                 double total = team.WonRounds + team.LostRounds;
                                 double winPercent = total > 0 ? (team.WonRounds / total) * 100 : 0;
                                 <td class="text-white fw-bold fs-4" style="width: 40px;">@(i + 1)</td>
-                                <td class="fw-bold fs-4"><a asp-controller="Teams" asp-action="Details" asp-route-id="@team.TeamId" class="text-white text-decoration-none hover-val-red">@team.ShortCode</a></td>
+                                <td class="fw-bold fs-4">
+                                    <a asp-controller="Teams" asp-action="Details" asp-route-id="@team.TeamId" class="text-white text-decoration-none hover-val-red">@team.ShortCode</a>
+                                </td>
                                 <td class="text-end text-val-orange fw-bold fs-4">@winPercent.ToString("0.0")%</td>
                             }
                             else

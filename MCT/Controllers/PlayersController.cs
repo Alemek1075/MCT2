@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +14,10 @@ namespace MCT.Controllers
         public PlayersController(MctContext context) { _context = context; }
 
         public async Task<IActionResult> Index() { return View(await _context.Players.Include(p => p.Team).Include(p => p.User).ToListAsync()); }
+
         public async Task<IActionResult> Details(int? id) { if (id == null) return NotFound(); return View(await _context.Players.Include(p => p.Team).Include(p => p.User).FirstOrDefaultAsync(m => m.PlayerId == id)); }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "Name");
@@ -24,6 +27,7 @@ namespace MCT.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("PlayerId,UserId,TeamId")] Player player)
         {
             if (_context.Players.Any(p => p.UserId == player.UserId)) ModelState.AddModelError("UserId", "User is already assigned to a team!");
@@ -33,6 +37,7 @@ namespace MCT.Controllers
             return View(player);
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -45,6 +50,7 @@ namespace MCT.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, [Bind("PlayerId,UserId,TeamId")] Player player)
         {
             if (id != player.PlayerId) return NotFound();
@@ -60,6 +66,7 @@ namespace MCT.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var player = await _context.Players.FindAsync(id);

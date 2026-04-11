@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +21,13 @@ namespace MCT.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Matches.Include(m => m.Tournament).Include(m => m.TeamA).Include(m => m.TeamB).ToListAsync());
+            var matches = await _context.Matches
+                .Include(m => m.TeamA)
+                .Include(m => m.TeamB)
+                .Include(m => m.Tournament)
+                .ToListAsync();
+
+            return View(matches);
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -29,6 +36,7 @@ namespace MCT.Controllers
             return View(await _context.Matches.Include(m => m.Tournament).Include(m => m.TeamA).Include(m => m.TeamB).FirstOrDefaultAsync(m => m.MatchId == id));
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             ViewBag.TournamentId = new SelectList(_context.Tournaments, "TournamentId", "Description");
@@ -40,6 +48,7 @@ namespace MCT.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("MatchId,TournamentId,TeamAId,TeamBId,ScheduledAt,MatchType")] Match match)
         {
             if (match.TeamAId == match.TeamBId) ModelState.AddModelError("TeamBId", "Team B cannot be the same as Team A.");
@@ -63,6 +72,7 @@ namespace MCT.Controllers
             return View(match);
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -71,6 +81,7 @@ namespace MCT.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, Match matchForm)
         {
             var match = await _context.Matches.Include(m => m.TeamA).Include(m => m.TeamB).FirstOrDefaultAsync(m => m.MatchId == id);
@@ -93,7 +104,6 @@ namespace MCT.Controllers
             {
                 _context.Update(match);
                 await _context.SaveChangesAsync();
-
                 await RecalculateBracket(match.TournamentId);
             }
             catch (DbUpdateConcurrencyException) { throw; }
@@ -150,6 +160,7 @@ namespace MCT.Controllers
             await _context.SaveChangesAsync();
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -158,6 +169,7 @@ namespace MCT.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var match = await _context.Matches.FindAsync(id);

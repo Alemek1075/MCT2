@@ -20,7 +20,15 @@
 
         <div class="mb-4">
             <label asp-for="UserId" class="form-label">OWNER (USER)</label>
-            <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId"></select>
+            @if (User.IsInRole("Admin"))
+            {
+                <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId"></select>
+            }
+            else
+            {
+                <input type="hidden" asp-for="UserId" value="@User.FindFirst("UserId")?.Value" />
+                <input type="text" class="form-control" value="@User.Identity.Name" disabled style="background-color: #2b2b2b; color: #a9b4af; cursor: not-allowed;" />
+            }
         </div>
 
         <div class="mb-4">

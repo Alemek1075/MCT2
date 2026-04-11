@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MCT.Models;
@@ -12,17 +13,22 @@ namespace MCT.Controllers
         public TeamsController(MctContext context) { _context = context; }
 
         public async Task<IActionResult> Index() { return View(await _context.Teams.Include(t => t.Players).ToListAsync()); }
+
         public async Task<IActionResult> Details(int? id) { if (id == null) return NotFound(); return View(await _context.Teams.Include(t => t.Players).ThenInclude(p => p.User).FirstOrDefaultAsync(m => m.TeamId == id)); }
+
+        [Authorize(Roles = "Admin")]
         public IActionResult Create() { return View(); }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("TeamId,Name,ShortCode,Region")] Team team)
         {
             if (ModelState.IsValid) { _context.Add(team); await _context.SaveChangesAsync(); return RedirectToAction(nameof(Index)); }
             return View(team);
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -33,6 +39,7 @@ namespace MCT.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, [Bind("TeamId,Name,ShortCode,Region")] Team team)
         {
             if (id != team.TeamId) return NotFound();
@@ -46,6 +53,7 @@ namespace MCT.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var team = await _context.Teams.FindAsync(id);

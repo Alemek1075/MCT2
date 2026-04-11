@@ -29,13 +29,44 @@
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">HOME</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Tournaments" asp-action="Index">EVENTS</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Matches" asp-action="Index">MATCHES</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Teams" asp-action="Index">TEAMS</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Leaderboard" asp-action="Index">LEADERBOARD</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Teams" asp-action="Index">TEAMS</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Players" asp-action="Index">PLAYERS</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Users" asp-action="Index">USERS</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Tickets" asp-action="Index">TICKETS</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="SalesTickets" asp-action="Index">SALES</a></li>
+                        
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Tickets" asp-action="Index">TICKETS</a></li>
+                            
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Users" asp-action="Index">USERS</a></li>
+                                <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="SalesTickets" asp-action="Index">SALES</a></li>
+                            }
+                        }
                     </ul>
+
+                    <div class="d-flex align-items-center gap-4">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <div class="dropdown">
+                                <button class="btn btn-dark dropdown-toggle text-white border-0 font-monospace fs-6" type="button" data-bs-toggle="dropdown" style="background-color: transparent;">
+                                    @User.Identity.Name
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" style="background-color: #1f2326; border: 1px solid #333;">
+                                    <li>
+                                        <form asp-controller="Auth" asp-action="Logout" method="post" class="m-0">
+                                            <button type="submit" class="dropdown-item text-white font-monospace hover-val-red" style="background-color: transparent;">LOG OUT</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <a href="#" class="text-secondary text-decoration-none fw-bold" style="letter-spacing: 1px;" data-bs-toggle="modal" data-bs-target="#signInModal">SIGN IN</a>
+                            <a href="#" class="btn btn-danger-val text-white fw-bold px-4" data-bs-toggle="modal" data-bs-target="#logInModal">LOG IN</a>
+                        }
+                    </div>
                 </div>
             </div>
         </nav>
@@ -67,9 +98,110 @@
         </div>
     </div>
 
+    <div class="modal fade" id="signInModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content val-card border-secondary">
+                <div class="modal-header border-bottom border-secondary">
+                    <h5 class="modal-title text-val-red m-0" style="font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 1px;">CREATE ACCOUNT</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-controller="Auth" asp-action="Register" method="post">
+                    <div class="modal-body p-4">
+                        @if (TempData["AuthError"]?.ToString() == "register" && TempData["AuthErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger p-2 mb-3 font-monospace" style="font-size: 0.85rem;">
+                                @TempData["AuthErrorMessage"]
+                            </div>
+                        }
+                        <div class="mb-3">
+                            <label class="form-label text-muted text-uppercase" style="font-size: 0.85rem;">Username</label>
+                            <input type="text" name="username" class="form-control" value="@TempData["signtempdataname"]" required minlength="3" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted text-uppercase" style="font-size: 0.85rem;">Email</label>
+                            <input type="email" name="email" class="form-control" value="@TempData["signtempdataemail"]" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted text-uppercase" style="font-size: 0.85rem;">Password</label>
+                            <input type="password" name="password" class="form-control" value="@TempData["signtempdatapass"]" required minlength="6" />
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-secondary">
+                        <button type="submit" class="btn btn-primary">SIGN IN</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="logInModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content val-card border-secondary">
+                <div class="modal-header border-bottom border-secondary">
+                    <h5 class="modal-title text-val-red m-0" style="font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 1px;">SYSTEM LOGIN</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-controller="Auth" asp-action="Login" method="post">
+                    <div class="modal-body p-4">
+                        @if (TempData["AuthError"]?.ToString() == "login" && TempData["AuthErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger p-2 mb-3 font-monospace" style="font-size: 0.85rem;">
+                                @TempData["AuthErrorMessage"]
+                            </div>
+                        }
+                        <div class="mb-3">
+                            <label class="form-label text-muted text-uppercase" style="font-size: 0.85rem;">Username or Email</label>
+                            <input type="text" name="loginIdentifier" class="form-control" value="@TempData["logtempdata1"]" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted text-uppercase" style="font-size: 0.85rem;">Password</label>
+                            <input type="password" name="password" class="form-control" value="@TempData["logtempdatapass"]" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-secondary">
+                        <button type="submit" class="btn btn-danger-val">LOG IN</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @if (TempData["AuthError"] != null)
+    {
+        <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    var errorType = '@TempData["AuthError"]';
+                    if (errorType === 'login') {
+                        var loginModal = new bootstrap.Modal(document.getElementById('logInModal'));
+                        loginModal.show();
+                    } else if (errorType === 'register') {
+                        var registerModal = new bootstrap.Modal(document.getElementById('signInModal'));
+                        registerModal.show();
+                    }
+                });
+        </script>
+    }
+
+    <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var signInModal = document.getElementById('signInModal');
+                var logInModal = document.getElementById('logInModal');
+
+                signInModal.addEventListener('hidden.bs.modal', function () {
+                    var inputs = this.querySelectorAll('input');
+                    inputs.forEach(function(input) { input.value = ''; });
+                });
+
+                logInModal.addEventListener('hidden.bs.modal', function () {
+                    var inputs = this.querySelectorAll('input');
+                    inputs.forEach(function(input) { input.value = ''; });
+                });
+            });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

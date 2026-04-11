@@ -3,41 +3,39 @@
     ViewData["Title"] = "LEADERBOARD";
 }
 
-<div class="page-container mx-auto" style="max-width: 1200px;">
-    <div class="d-flex justify-content-between align-items-end border-bottom border-secondary mb-4 pb-2">
-        <h3 class="text-val-red m-0">GLOBAL RANKINGS</h3>
-    </div>
+<div class="page-container mx-auto" style="max-width: 1000px;">
+    <h3 class="text-val-red mb-4 border-bottom border-secondary pb-2">GLOBAL RANKINGS</h3>
 
     <div class="val-card p-4">
         <table class="table table-dark table-borderless align-middle mb-0">
-            <thead class="border-bottom border-secondary text-muted">
+            <thead class="text-muted border-bottom border-secondary" style="font-size: 0.85rem; letter-spacing: 1px;">
                 <tr>
-                    <th class="fw-normal text-center" style="letter-spacing: 1px; width: 80px;">RANK</th>
-                    <th class="fw-normal" style="letter-spacing: 1px;">TEAM</th>
-                    <th class="fw-normal text-center" style="letter-spacing: 1px;">MATCHES</th>
-                    <th class="fw-normal text-center" style="letter-spacing: 1px;">WIN %</th>
-                    <th class="fw-normal text-end" style="letter-spacing: 1px;">ROUND DIFF</th>
+                    <th class="fw-normal" style="width: 80px;">RANK</th>
+                    <th class="fw-normal">TEAM</th>
+                    <th class="fw-normal text-center">MATCHES</th>
+                    <th class="fw-normal text-center">WIN %</th>
+                    <th class="fw-normal text-end">ROUND DIFF</th>
                 </tr>
             </thead>
             <tbody>
                 @{
                     int rank = 1;
                 }
-                @foreach (var team in Model)
+                @foreach (var item in Model)
                 {
+                    string diffColor = item.Diff > 0 ? "text-success" : (item.Diff < 0 ? "text-danger" : "text-muted");
+                    string diffSign = item.Diff > 0 ? "+" : "";
+
                     <tr class="border-bottom border-secondary" style="height: 60px;">
-                        <td class="text-center text-white fw-bold fs-4">@rank</td>
-                        <td class="fw-bold fs-5">
-                            <a asp-controller="Teams" asp-action="Details" asp-route-id="@team.TeamId" class="text-white text-decoration-none hover-val-red d-flex align-items-center gap-2">
-                                @team.TeamName
-                                <span class="badge bg-dark border border-secondary text-val-orange font-monospace fs-6">@team.ShortCode</span>
+                        <td class="text-white fw-bold fs-4">@rank</td>
+                        <td class="fw-bold fs-5 text-white">
+                            <a asp-controller="Teams" asp-action="Details" asp-route-id="@item.TeamId" class="text-white hover-val-red text-decoration-none d-flex align-items-center gap-2">
+                                @item.TeamName <span class="text-muted border border-secondary rounded px-1" style="font-size: 0.65rem; background-color: transparent;">@item.ShortCode</span>
                             </a>
                         </td>
-                        <td class="text-center font-monospace fs-5">@team.MatchesPlayed</td>
-                        <td class="text-center text-val-red fw-bold fs-4 font-monospace">@team.WinPercentage.ToString("0.0")%</td>
-                        <td class="text-end text-val-orange fw-bold fs-4 font-monospace">
-                            @(team.Diff > 0 ? "+" + team.Diff : team.Diff.ToString())
-                        </td>
+                        <td class="text-center font-monospace">@item.MatchesPlayed</td>
+                        <td class="text-center fw-bold fs-5">@item.WinPercentage.ToString("0.0")%</td>
+                        <td class="text-end font-monospace fw-bold @diffColor fs-5">@diffSign@item.Diff</td>
                     </tr>
                     rank++;
                 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -28,12 +29,9 @@ namespace MCT.Controllers
             if (id == null) return NotFound();
 
             var tournament = await _context.Tournaments
-                .Include(t => t.Matches)
-                    .ThenInclude(m => m.TeamA)
-                .Include(t => t.Matches)
-                    .ThenInclude(m => m.TeamB)
-                .Include(t => t.TournamentTeams)
-                    .ThenInclude(tt => tt.Team)
+                .Include(t => t.Matches).ThenInclude(m => m.TeamA)
+                .Include(t => t.Matches).ThenInclude(m => m.TeamB)
+                .Include(t => t.TournamentTeams).ThenInclude(tt => tt.Team)
                 .FirstOrDefaultAsync(m => m.TournamentId == id);
 
             if (tournament == null) return NotFound();
@@ -41,6 +39,7 @@ namespace MCT.Controllers
             return View(tournament);
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
             ViewBag.Teams = await _context.Teams.ToListAsync();
@@ -49,6 +48,7 @@ namespace MCT.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(Tournament tournament)
         {
             ModelState.Remove("EndDate");
@@ -135,6 +135,7 @@ namespace MCT.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -148,6 +149,7 @@ namespace MCT.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, Tournament tournament)
         {
             if (id != tournament.TournamentId) return NotFound();
@@ -223,13 +225,12 @@ namespace MCT.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
 
-            var tournament = await _context.Tournaments
-                .FirstOrDefaultAsync(m => m.TournamentId == id);
-
+            var tournament = await _context.Tournaments.FirstOrDefaultAsync(m => m.TournamentId == id);
             if (tournament == null) return NotFound();
 
             return View(tournament);
@@ -237,6 +238,7 @@ namespace MCT.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var tournament = await _context.Tournaments

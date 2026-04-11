@@ -3,24 +3,41 @@
     ViewData["Title"] = "PLAYER DETAILS";
 }
 
-<div class="page-container mx-auto" style="max-width: 600px;">
-    <div class="d-flex justify-content-between align-items-end border-bottom border-secondary mb-4 pb-2">
-        <h3 class="text-val-red m-0">PLAYER PROFILE</h3>
-        <div class="d-flex gap-2">
-            <a asp-action="Edit" asp-route-id="@Model.PlayerId" class="btn btn-primary btn-action-sm">EDIT</a>
-            <a asp-action="Index" class="btn-outline-val btn-action-sm">BACK</a>
+<div class="page-container mx-auto" style="max-width: 800px;">
+    <div class="d-flex justify-content-between align-items-center border-bottom border-secondary mb-4 pb-3">
+        <h1 class="text-val-red m-0">PLAYER PROFILE</h1>
+        <div class="d-flex gap-3">
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Edit" asp-route-id="@Model?.PlayerId" class="btn btn-outline-val">EDIT PLAYER</a>
+            }
+            <a asp-action="Index" class="btn btn-outline-secondary font-monospace fw-bold text-uppercase border-0 text-white" style="background: transparent;">BACK TO LIST</a>
         </div>
     </div>
 
-    <div class="val-card p-5 text-center">
-        <h1 class="text-white m-0" style="font-size: 3.5rem;">@Model.User?.Username</h1>
-        <h5 class="text-muted mt-2 font-monospace">@Model.User?.Email</h5>
+    <div class="val-card p-5 text-center mb-4">
+        <h1 class="text-white m-0 text-uppercase" style="font-size: 4rem; font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px;">
+            @(Model.User?.Username ?? "UNKNOWN")
+        </h1>
         
-        <div class="mt-5 pt-4 border-top border-secondary row">
-            <div class="col-12">
-                <p class="text-muted mb-1 form-label">CURRENT TEAM</p>
-                <h3 class="text-white">@(Model.Team?.Name ?? "FREE AGENT") <span class="text-val-orange font-monospace fs-4">[@(Model.Team?.ShortCode ?? "N/A")]</span></h3>
-            </div>
+        <div class="mt-5 pt-4 border-top border-secondary">
+            <p class="text-muted mb-1 form-label text-uppercase">CURRENT TEAM</p>
+            @if (Model.Team != null)
+            {
+                <h2 class="text-val-orange m-0" style="font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px;">@Model.Team.Name</h2>
+            }
+            else
+            {
+                <h3 class="text-muted m-0 font-monospace">FREE AGENT</h3>
+            }
         </div>
+
+        @if (User.IsInRole("Admin") || User.IsInRole("Player"))
+        {
+            <div class="mt-4 pt-4 border-top border-secondary">
+                <p class="text-muted mb-1 form-label text-uppercase">LINKED ACCOUNT EMAIL</p>
+                <p class="text-white fs-5 m-0 font-monospace">@(Model.User?.Email ?? "No account linked")</p>
+            </div>
+        }
     </div>
 </div>

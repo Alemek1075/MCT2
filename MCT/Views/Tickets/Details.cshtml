@@ -1,17 +1,29 @@
 ﻿@model MCT.Models.Ticket
 @{
     ViewData["Title"] = "TICKET DETAILS";
-    string displayStatus = Model.Status == "Canceled" ? "CANCELED" :
-                          (Model.Tournament?.EndDate < DateTime.UtcNow.Date ? "USED" : "VALID");
-    string badgeClass = displayStatus == "CANCELED" ? "bg-danger" :
-                       (displayStatus == "USED" ? "bg-secondary" : "bg-success");
+
+    string finalStatus = Model.Status ?? "Unknown";
+    
+    if (finalStatus.Equals("Valid", StringComparison.OrdinalIgnoreCase) && Model.Tournament?.EndDate.HasValue == true)
+    {
+        if (DateTime.UtcNow.Date > Model.Tournament.EndDate.Value.Date)
+        {
+            finalStatus = "Used";
+        }
+    }
+
+    string badgeClass = finalStatus.Equals("Valid", StringComparison.OrdinalIgnoreCase) ? "bg-success" :
+                       (finalStatus.Equals("Canceled", StringComparison.OrdinalIgnoreCase) ? "bg-danger" : "bg-secondary");
 }
 
 <div class="page-container mx-auto" style="max-width: 500px;">
     <div class="d-flex justify-content-between align-items-end border-bottom border-secondary mb-4 pb-2">
         <h3 class="text-val-red m-0">TICKET INFO</h3>
         <div class="d-flex gap-2">
-            <a asp-action="Edit" asp-route-id="@Model?.TicketId" class="btn btn-primary btn-sm btn-action-sm">MANAGE</a>
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Edit" asp-route-id="@Model?.TicketId" class="btn btn-primary btn-sm btn-action-sm">MANAGE</a>
+            }
             <a asp-action="Index" class="btn-outline-val btn-sm btn-action-sm">BACK</a>
         </div>
     </div>
@@ -34,7 +46,7 @@
             </div>
             <div class="col-6">
                 <p class="text-muted mb-1 form-label">STATUS</p>
-                <span class="badge @badgeClass border border-secondary text-white fs-6" style="letter-spacing: 1px;">@displayStatus</span>
+                <span class="badge @badgeClass border border-secondary text-white fs-6 text-uppercase" style="letter-spacing: 1px;">@finalStatus</span>
             </div>
         </div>
     </div>
